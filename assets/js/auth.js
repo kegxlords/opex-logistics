@@ -114,7 +114,7 @@
   document.addEventListener('DOMContentLoaded', async () => {
     const page = document.body.dataset.page;
     hero(); eyes();
-    await guard();
+    const session = await guard();
     bootOff();
 
     /* ===== LOGIN ===== */
@@ -207,7 +207,7 @@
       const form = document.getElementById('resetForm');
       const token = new URLSearchParams(location.search).get('token') || '';
       strength(document.getElementById('password'), document.getElementById('meter'));
-      if (!token) a.show('This link is missing its reset token. Request a new one from the forgot-password page.', 'warn');
+      if (Store.live ? !session : !token) a.show('This recovery link is missing or expired. Open the latest reset email or request a new link.', 'warn');
 
       form.addEventListener('submit', async e => {
         e.preventDefault(); a.hide();
