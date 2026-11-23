@@ -3,62 +3,73 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Home · CSC Apartments</title>
-<meta name="theme-color" content="#1F6FEB">
-<meta name="description" content="Your CSC Apartments resident portal — lease a residence and earn income every 24 hours.">
+<title>Dispatch Board · Tranex</title>
+<meta name="theme-color" content="#0F1216">
+<meta name="description" content="Tranex dispatch board — follow lease funding and income drops in real time.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/theme.css?v=3">
-<link rel="stylesheet" href="assets/css/layout.css?v=3">
-<link rel="stylesheet" href="assets/css/components.css?v=3">
-<style>
-  .greet-row{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
-  .greet-row .eyebrow{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--pink);display:block;margin-bottom:2px}
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/theme.css?v=4">
+<link rel="stylesheet" href="assets/css/layout.css?v=4">
+<link rel="stylesheet" href="assets/css/components.css?v=4">
+<link rel="stylesheet" href="assets/css/tranex.css?v=1">
 </head>
 <body data-page="dashboard">
 
 <div class="boot" id="boot"><div class="boot-in">
-  <div class="boot-ring"><span class="crest-mark"><svg viewBox="0 0 40 40"><path d="M20 4 L34 13 V36 H6 V13 Z" fill="none" stroke="#fff" stroke-width="2.4"/><rect x="12" y="19" width="6" height="6" fill="#FFD9EC"/><rect x="22" y="19" width="6" height="6" fill="#fff"/></svg></span></div>
-  <div class="boot-txt">CSC</div>
+  <div class="boot-ring"><span class="crest-mark"><svg viewBox="0 0 40 40" role="img" aria-label="Tranex dispatch mark"><path d="M8 8h24v24H8z" fill="none" stroke="#FFB020" stroke-width="2.4"/><path d="M13 14h14M20 14v13" fill="none" stroke="#FFB020" stroke-width="2.6" stroke-linecap="square"/><path d="M15 27h10" fill="none" stroke="#17C3B2" stroke-width="2.2"/></svg></span></div>
+  <div class="boot-txt">Dispatch sync</div>
 </div></div>
 
 <div class="app">
   <header id="hdr"></header>
 
   <main class="main">
-    <div class="greet-row rise rise-1">
+    <section class="dispatch-banner rise rise-1" aria-label="Tranex dispatch summary">
       <div>
-        <span class="eyebrow">Resident portal</span>
-        <h1 style="font-size:26px">Hello, <span id="greet">Member</span></h1>
+        <span class="eyebrow">Tranex / member operations</span>
+        <h1>Capital in motion.</h1>
+        <p>Track every lease, income drop and balance movement from one dispatch board.</p>
       </div>
-    </div>
-
-    <section class="sec rise rise-2"><div class="carousel" id="carousel"></div></section>
-
-    <section class="sec rise rise-3">
-      <div class="balance">
-        <div class="balance-cell"><div class="k">Available balance</div><div class="v c-blue" id="balMain">₦0</div></div>
-        <div class="balance-sep"></div>
-        <div class="balance-cell"><div class="k">Income balance</div><div class="v c-green" id="balIncome">₦0</div></div>
-        <button class="balance-hist" id="histBtn" type="button">
-          History
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
+      <div class="banner-code"><b>FLEET CONTROL · 01</b>NETWORK STATUS / LIVE<br>OPERATOR / <span id="greet">MEMBER</span></div>
     </section>
 
-    <section class="sec rise rise-4"><div class="qa" id="qa"></div></section>
+    <div class="dispatch-grid">
+      <div class="dispatch-left">
+        <section class="balance rise rise-2" aria-label="Wallet balances">
+          <div class="balance-cell"><div class="k">Available balance</div><div class="v odometer" id="balMain" aria-live="polite">₦0</div></div>
+          <div class="balance-sep" aria-hidden="true"></div>
+          <div class="balance-cell"><div class="k">Income balance</div><div class="v odometer" id="balIncome" aria-live="polite">₦0</div></div>
+          <button class="balance-hist" id="histBtn" type="button">Open ledger</button>
+        </section>
 
-    <section class="sec rise rise-5">
-      <div class="sec-head">
-        <div><span class="eyebrow">Now leasing</span><h2>Available Residences</h2></div>
-        <a class="sec-link" href="rents.html">My leases
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
+        <section class="qa rise rise-3" id="qa" aria-label="Quick actions"></section>
       </div>
+
+      <section class="board-panel rise rise-4" aria-labelledby="activeBoardTitle">
+        <div class="sec-head">
+          <div><span class="eyebrow">Live departures</span><h2 id="activeBoardTitle">Active fundings</h2></div>
+          <a class="sec-link" href="rents.html">Open fleet →</a>
+        </div>
+        <div class="departure-head" aria-hidden="true"><span>ROUTE / UNIT</span><span>FUND</span><span>PER 24H</span><span>DAYS</span><span>TOTAL</span><span>STATUS</span></div>
+        <div class="departure-board" id="activeLeases" aria-live="polite"></div>
+      </section>
+    </div>
+
+    <section class="sec rise rise-5" style="margin-top:22px">
+      <div class="sec-head">
+        <div><span class="eyebrow">Fleet / departures</span><h2>Available fleet</h2></div>
+        <a class="sec-link" href="rents.html">My active leases →</a>
+      </div>
+      <div class="departure-head fleet-head" aria-hidden="true"><span>UNIT / PLAN</span><span>SPECIFICATION</span><span>FUND · PER 24H · DAYS · TOTAL</span><span>STATUS / ACTION</span></div>
       <div class="units" id="units"></div>
+    </section>
+
+    <section class="manifest-strip rise rise-6" aria-label="Member manifest">
+      <div class="manifest-cell"><i class="status-lamp status-lamp--amber" aria-hidden="true"></i><small>CREW CODE</small><b id="manifestCrew">—</b></div>
+      <div class="manifest-cell"><small>JOINED</small><b id="manifestJoined">—</b></div>
+      <div class="manifest-cell"><small>ACCOUNT STATUS</small><b id="manifestState">—</b></div>
+      <div class="manifest-cell"><small>DISPATCH</small><b>AUTHORIZED</b></div>
     </section>
   </main>
 
@@ -67,14 +78,14 @@
     <span class="spark"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span>
   </button>
 
-  <nav id="nav"></nav>
+  <nav id="nav" aria-label="Member navigation"></nav>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/config.js?v=4"></script>
 <script src="assets/js/store.js?v=4"></script>
-<script src="assets/js/app.js?v=3"></script>
+<script src="assets/js/app.js?v=4"></script>
 <script src="assets/js/actions.js?v=3"></script>
-<script src="assets/js/dashboard.js?v=3"></script>
+<script src="assets/js/dashboard.js?v=4"></script>
 </body>
 </html>

@@ -61,7 +61,7 @@
       const pct = Math.min(100, Math.round(l.days_paid / u.duration_days * 100));
       const next = l.started_at + (l.days_paid + 1) * Store.DAY;
       const remaining = Math.max(0, u.duration_days - l.days_paid);
-      return `<article class="lease">
+      return `<article class="lease ${out ? 'lease--out' : ''}">
         <div class="lease-top">
           <div class="lease-thumb">${img(u)}</div>
           <div class="lease-meta"><b>${esc(u.name)}</b><span>${esc(u.tier)} · ${u.sqm} m²</span></div>
@@ -69,8 +69,8 @@
         </div>
 
         <div class="timer ${out ? 'out' : ''}" data-drop="${out ? '' : next}">
-          <span class="k">${out ? 'Income status' : 'Next drop in'}</span>
-          <span class="clock">${out ? 'Out of income days' : hms(next - Date.now())}</span>
+          <span class="k">${out ? 'OUT OF DISPATCH DAYS' : 'NEXT DROP IN'}</span>
+          <span class="clock">${out ? 'OUT OF DISPATCH DAYS' : hms(next - Date.now())}</span>
         </div>
 
         <div class="bar"><i style="width:${pct}%"></i></div>
@@ -109,7 +109,7 @@
   document.addEventListener('DOMContentLoaded', async () => {
     if (!await UI.guard()) return;
     Store.sweep();
-    UI.mountHeader({ title: 'My Leases', back: 'dashboard.html' });
+    UI.mountHeader({ title: 'My Fleet', back: 'dashboard.html' });
     UI.mountNav('rents.html');
     render();
     ticker = setInterval(tick, 1000);

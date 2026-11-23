@@ -5,7 +5,7 @@
    ============================================================ */
 (function () {
   'use strict';
-  const { icon, esc, naira, dt, toast, layer, closeLayer, confirmSheet, countTo, imgWithFallback } = UI;
+  const { icon, esc, naira, dt, hms, toast, layer, closeLayer, confirmSheet, imgWithFallback } = UI;
   const A = Actions;
   const CFG = window.PINNACLE;
 
@@ -19,12 +19,12 @@
     const l = layer(`
       <button class="modal-x" data-close aria-label="Close">${icon('x')}</button>
       <div class="welcome-hero">
-        <div class="em">🏙️</div>
-        <h2>Welcome back, <span class="welcome-name">${esc(first)}</span></h2>
-        <p>Your residences are earning. Income drops automatically every 24 hours.</p>
+        <div class="em" aria-hidden="true">01</div>
+        <h2>Network active, <span class="welcome-name">${esc(first)}</span></h2>
+        <p>Your active leases are on route. Income drops automatically every 24 hours.</p>
       </div>
       <div class="welcome-body">
-        <p class="welcome-note">Join the residents’ group for payout alerts, new unit releases and instant help from our care team.</p>
+        <p class="welcome-note">Join the crew channel for payout alerts, new unit releases and direct help from our care team.</p>
         <div class="welcome-actions">
           <a class="wa-btn wa-btn--wa" href="${esc(s.whatsapp_link)}" target="_blank" rel="noopener">
             ${icon('wa')}<span>Join WhatsApp Group<small>Payout alerts &amp; community</small></span>${icon('chev')}
@@ -33,7 +33,7 @@
             ${icon('headset')}<span>Customer Service<small>Live chat · ${esc(s.support_email)}</small></span>${icon('chev')}
           </button>
         </div>
-        <button class="welcome-skip" data-close type="button">Continue to dashboard</button>
+        <button class="welcome-skip" data-close type="button">Enter dispatch board</button>
       </div>`);
     const b = l.querySelector('#wCare');
     if (b) b.addEventListener('click', () => { closeLayer(); setTimeout(UI.careSheet, 280); });
@@ -93,8 +93,58 @@
     const w = Store.wallet();
     const b = document.getElementById('balMain');
     const i = document.getElementById('balIncome');
-    if (b) b.textContent = naira(w.balance);
-    if (i) i.textContent = naira(w.income);
+    paintOdometer(b, naira(w.balance));
+    paintOdometer(i, naira(w.income));
+  }
+
+  function paintOdometer(el, value) {
+    if (!el || el.dataset.readout === value) return;
+    el.dataset.readout = value;
+    el.setAttribute('aria-label', value);
+    el.innerHTML = [...value].map((character, index) => /\d/.test(character)
+      ? `<span class="odo-digit" aria-hidden="true"><span style="animation-delay:${Math.min(index * 14, 112)}ms">${character}</span></span>`
+      : `<span class="odo-char" aria-hidden="true">${esc(character)}</span>`).join('');
+  }
+
+  function paintActiveLeases() {
+    const root = document.getElementById('activeLeases');
+    if (!root) return;
+    const leases = Store.leases().filter(lease => lease.status === 'active' && lease.days_paid < lease.unit.duration_days);
+    if (!leases.length) {
+      root.innerHTML = `<div class="board-empty">NO ACTIVE ROUTES // OPEN THE FLEET BOARD TO LEASE A UNIT.</div>`;
+      return;
+    }
+    root.innerHTML = leases.map((lease, index) => {
+      const unit = lease.unit;
+      const days = Number(lease.days_paid) || 0;
+      const duration = Math.max(1, Number(unit.duration_days) || 1);
+      const progress = Math.min(100, Math.round(days / duration * 100));
+      const next = lease.started_at + (days + 1) * Store.DAY;
+      return `<article class="flap-row" style="animation-delay:${Math.min(index * 45, 270)}ms">
+        <b class="flap-name">${esc(unit.name)}</b>
+        <div class="flap-columns">
+          <span class="flap-value"><small>FUND</small>${naira(unit.price)}</span>
+          <span class="flap-value"><small>PER 24H</small>${naira(unit.daily_yield)}</span>
+          <span class="flap-value"><small>DAYS</small>${days}/${duration}</span>
+          <span class="flap-value"><small>TOTAL</small>${naira(unit.daily_yield * duration)}</span>
+        </div>
+        <span class="flap-status"><i class="status-lamp" aria-hidden="true"></i>EN ROUTE <b class="board-countdown" data-board-drop="${next}">${hms(next - Date.now())}</b></span>
+        <div class="flap-route" aria-label="${progress}% of income route complete">
+          <i class="route-pin" aria-hidden="true"></i><span class="route-track"><i style="--route-progress:${progress}%"></i></span><i class="route-pin end" aria-hidden="true"></i>
+        </div>
+      </article>`;
+    }).join('');
+  }
+
+  function paintManifest() {
+    const me = Store.me();
+    if (!me) return;
+    const crew = document.getElementById('manifestCrew');
+    const joined = document.getElementById('manifestJoined');
+    const state = document.getElementById('manifestState');
+    if (crew) crew.textContent = me.referral_code || '—';
+    if (joined) joined.textContent = me.created_at ? dt(me.created_at).split(',')[0] : '—';
+    if (state) state.textContent = me.is_active === false ? 'HELD' : 'ACTIVE';
   }
 
   /* ================= four quick actions ================= */
@@ -135,8 +185,8 @@
     if (!list.length) {
       root.innerHTML = `<div class="card"><div class="empty">
         <div class="empty-art">${icon('building')}</div>
-        <b>No residences released yet</b>
-        <p>New units are published by management. Check back shortly.</p>
+          <b>No units in dispatch</b>
+          <p>Management has not released a new fleet unit yet. Check back shortly.</p>
       </div></div>`;
       return;
     }
@@ -145,7 +195,7 @@
       const left = Math.max(0, u.purchase_limit - Store.ownedCount(u.id));
       const live = u.status === 'live';
       const total = u.daily_yield * u.duration_days;
-      return `<article class="unit rise">
+      return `<article class="unit rise ${live && !left ? 'unit--capped' : ''}">
         <div class="unit-img">${unitImg(u)}<span class="ribbon">${esc(u.tier)}</span></div>
         <div class="unit-body">
           <div class="unit-top">
@@ -269,6 +319,8 @@
   function refresh() {
     paintBalance();
     paintUnits();
+    paintActiveLeases();
+    paintManifest();
     paintPip();
     const me = Store.me();
     const g = document.getElementById('greet');
@@ -284,15 +336,17 @@
     const me = Store.me();
     const s = Store.settings();
 
-    UI.mountHeader({});
+    UI.mountHeader({ title: 'Board' });
     UI.mountNav('dashboard.html');
-    carousel();
     quickActions();
     refresh();
 
-    const w = Store.wallet();
-    countTo(document.getElementById('balMain'), w.balance, naira);
-    countTo(document.getElementById('balIncome'), w.income, naira);
+    const boardTicker = setInterval(() => {
+      document.querySelectorAll('[data-board-drop]').forEach(el => {
+        el.textContent = hms(Number(el.dataset.boardDrop) - Date.now());
+      });
+    }, 1000);
+    timers.push(boardTicker);
 
     document.getElementById('histBtn').addEventListener('click', historySheet);
     document.getElementById('fab').addEventListener('click', giftSheet);

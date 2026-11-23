@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>My Leases · CSC Apartments</title>
-<meta name="theme-color" content="#1F6FEB">
+<title>My Leases · Tranex</title>
+<meta name="theme-color" content="#0F1216">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/theme.css?v=3">
-<link rel="stylesheet" href="assets/css/layout.css?v=3">
-<link rel="stylesheet" href="assets/css/components.css?v=3">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/theme.css?v=4">
+<link rel="stylesheet" href="assets/css/layout.css?v=4">
+<link rel="stylesheet" href="assets/css/components.css?v=4">
 <style>
   .chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:8px;margin-bottom:14px}
   .lease-grid{display:grid;gap:14px}
@@ -23,19 +23,20 @@
   .lease-hero-row b{font-family:var(--font-display);font-size:17px;font-weight:800;display:block}
   .lease-hero-row span{font-size:10.5px;font-weight:700;opacity:.85}
 </style>
+<link rel="stylesheet" href="assets/css/tranex.css?v=1">
 </head>
 <body data-page="rents">
 <div class="boot" id="boot"><div class="boot-in">
-  <div class="boot-ring"><span class="crest-mark"><svg viewBox="0 0 40 40"><path d="M20 4 L34 13 V36 H6 V13 Z" fill="none" stroke="#fff" stroke-width="2.4"/><rect x="12" y="19" width="6" height="6" fill="#FFD9EC"/><rect x="22" y="19" width="6" height="6" fill="#fff"/></svg></span></div>
-  <div class="boot-txt">CSC</div>
+  <div class="boot-ring"><span class="crest-mark"><svg viewBox="0 0 40 40" role="img" aria-label="Tranex dispatch mark"><path d="M8 8h24v24H8z" fill="none" stroke="#FFB020" stroke-width="2.4"/><path d="M13 14h14M20 14v13" fill="none" stroke="#FFB020" stroke-width="2.6" stroke-linecap="square"/><path d="M15 27h10" fill="none" stroke="#17C3B2" stroke-width="2.2"/></svg></span></div>
+  <div class="boot-txt">Dispatch sync</div>
 </div></div>
 
 <div class="app">
   <header id="hdr"></header>
   <main class="main">
     <div class="rise rise-1" style="margin-bottom:16px">
-      <span class="eyebrow" style="font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--pink);display:block">Your portfolio</span>
-      <h1>Rented Residences</h1>
+      <span class="eyebrow">Fleet / active routes</span>
+      <h1>My Fleet</h1>
     </div>
     <div id="hero" class="rise rise-2"></div>
     <div class="chips rise rise-3" id="filters"></div>
@@ -47,8 +48,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/config.js?v=4"></script>
 <script src="assets/js/store.js?v=4"></script>
-<script src="assets/js/app.js?v=3"></script>
+<script src="assets/js/app.js?v=4"></script>
 <script src="assets/js/actions.js?v=3"></script>
-<script src="assets/js/rents.js?v=3"></script>
+<script src="assets/js/rents.js?v=4"></script>
 </body>
 </html>

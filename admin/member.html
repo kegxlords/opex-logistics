@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Member Dossier · CSC Operations</title>
-<meta name="theme-color" content="#123A8F">
+<title>Member Dossier · Tranex Control</title>
+<meta name="theme-color" content="#0F1216">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/css/theme.css?v=3">
-<link rel="stylesheet" href="../assets/css/layout.css?v=3">
-<link rel="stylesheet" href="../assets/css/components.css?v=3">
-<link rel="stylesheet" href="../assets/css/admin.css?v=3">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/theme.css?v=4">
+<link rel="stylesheet" href="../assets/css/layout.css?v=4">
+<link rel="stylesheet" href="../assets/css/components.css?v=4">
+<link rel="stylesheet" href="../assets/css/admin.css?v=4">
 <style>
   .m-actions{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
   .m-actions .btn{flex:1;min-width:132px}
@@ -26,11 +26,12 @@
   .chain .node b{color:var(--pink)}
   .chain .arrow{color:var(--muted-2);font-weight:800}
 </style>
+<link rel="stylesheet" href="../assets/css/tranex.css?v=1">
 </head>
 <body class="console" data-page="member">
 
 <div class="boot" id="boot"><div class="boot-in">
-  <div class="boot-ring"><span class="crest-mark"><svg viewBox="0 0 40 40"><path d="M20 4 L34 13 V36 H6 V13 Z" fill="none" stroke="#fff" stroke-width="2.4"/><rect x="12" y="19" width="6" height="6" fill="#FFD9EC"/><rect x="22" y="19" width="6" height="6" fill="#fff"/></svg></span></div>
+  <div class="boot-ring"><span class="crest-mark"><svg viewBox="0 0 40 40" role="img" aria-label="Tranex dispatch mark"><path d="M8 8h24v24H8z" fill="none" stroke="#FFB020" stroke-width="2.4"/><path d="M13 14h14M20 14v13" fill="none" stroke="#FFB020" stroke-width="2.6" stroke-linecap="square"/><path d="M15 27h10" fill="none" stroke="#17C3B2" stroke-width="2.2"/></svg></span></div>
   <div class="boot-txt">Dossier</div>
 </div></div>
 
@@ -40,8 +41,8 @@
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </a>
     <a class="crest" href="index.html">
-      <span class="crest-mark"><svg viewBox="0 0 40 40"><path d="M20 4 L34 13 V36 H6 V13 Z" fill="none" stroke="#fff" stroke-width="2.2"/><rect x="11" y="18" width="6" height="6" fill="#FFD9EC"/><rect x="23" y="18" width="6" height="6" fill="#fff" opacity=".8"/><rect x="11" y="27" width="6" height="6" fill="#fff" opacity=".6"/><rect x="23" y="27" width="6" height="6" fill="#FFD9EC"/></svg></span>
-      <span class="crest-txt"><b>CSC</b><i>Operations</i></span>
+      <span class="crest-mark"><svg viewBox="0 0 40 40" role="img" aria-label="Tranex dispatch mark"><path d="M8 8h24v24H8z" fill="none" stroke="#FFB020" stroke-width="2.4"/><path d="M13 14h14M20 14v13" fill="none" stroke="#FFB020" stroke-width="2.6" stroke-linecap="square"/><path d="M15 27h10" fill="none" stroke="#17C3B2" stroke-width="2.2"/></svg></span>
+      <span class="crest-txt"><b>Tranex</b><i>Control</i></span>
     </a>
     <span class="console-tag">Dossier</span>
     <span style="flex:1"></span>
@@ -59,7 +60,7 @@
 
 <script src="../assets/js/config.js?v=4"></script>
 <script src="../assets/js/admin-store.js?v=4"></script>
-<script src="../assets/js/app.js?v=3"></script>
+<script src="../assets/js/app.js?v=4"></script>
 <script src="../assets/js/admin-member.js?v=3"></script>
 </body>
 </html>

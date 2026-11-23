@@ -15,8 +15,8 @@
       const w = canvas.clientWidth || 112, h = canvas.clientHeight || 50;
       canvas.width = w * dpr; canvas.height = h * dpr;
       ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
-      ctx.fillStyle = '#0E1730'; ctx.fillRect(0, 0, w, h);
-      const hues = ['#3D9BFF', '#FF6FB0', '#FF6A5E', '#35D68C', '#E8C86A'];
+      ctx.fillStyle = '#171C23'; ctx.fillRect(0, 0, w, h);
+      const hues = ['#FFB020', '#17C3B2', '#FF4D4F', '#3DDC7A', '#4DA3FF'];
       for (let i = 0; i < 7; i++) {
         ctx.strokeStyle = hues[i % hues.length] + '55';
         ctx.lineWidth = 1 + Math.random();
@@ -35,7 +35,7 @@
         ctx.save();
         ctx.translate(step * i + step / 2, h / 2 + (Math.random() * 6 - 3));
         ctx.rotate((Math.random() * 34 - 17) * Math.PI / 180);
-        ctx.font = '800 ' + (20 + Math.random() * 6) + 'px "Plus Jakarta Sans", system-ui, sans-serif';
+        ctx.font = '700 ' + (20 + Math.random() * 6) + 'px "Barlow Condensed", system-ui, sans-serif';
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillStyle = hues[(i + 1) % hues.length];
         ctx.fillText(value[i], 0, 0);
@@ -71,7 +71,7 @@
     const h = document.getElementById('hero'); if (!h) return;
     h.innerHTML = `<img class="auth-hero-img" src="${esc(window.PINNACLE.IMAGES.authHero)}" alt=""
         onerror="this.onerror=null;this.src='${Store.banner(0)}'">
-      <div class="auth-hero-badge">${UI.crest()}<b>CSC APARTMENTS</b></div>`;
+      <div class="auth-hero-badge">${UI.crest()}<b>TRANEX DISPATCH</b></div>`;
   }
   function eyes() {
     document.querySelectorAll('[data-eye]').forEach(btn => {

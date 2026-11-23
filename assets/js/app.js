@@ -151,19 +151,31 @@
 
   /* ---------------- shell ---------------- */
   const NAV = [
-    ['dashboard.html', 'home', 'Home'],
-    ['refer.html', 'refer', 'Refer'],
-    ['rents.html', 'rents', 'Rents'],
-    ['team.html', 'team', 'Team'],
-    ['profile.html', 'user', 'Profile']
+    ['dashboard.html', 'home', 'Board'],
+    ['rents.html', 'rents', 'Fleet'],
+    ['transactions.html', 'hist', 'Garage'],
+    ['team.html', 'team', 'Crew'],
+    ['profile.html', 'user', 'Account']
   ];
 
   function crest() {
     return `<span class="crest-mark"><svg viewBox="0 0 40 40" aria-hidden="true">
-      <path d="M20 4 L34 13 V36 H6 V13 Z" fill="none" stroke="#fff" stroke-width="2.2"/>
-      <rect x="11" y="18" width="6" height="6" fill="#FFD9EC"/><rect x="23" y="18" width="6" height="6" fill="#fff" opacity=".8"/>
-      <rect x="11" y="27" width="6" height="6" fill="#fff" opacity=".6"/><rect x="23" y="27" width="6" height="6" fill="#FFD9EC"/>
+      <path d="M6 7h28v6H22v21h-6V13H6z" fill="#0F1216"/>
     </svg></span>`;
+  }
+
+  let dispatchTicker = null;
+  function updateDispatchClock() {
+    const clock = document.getElementById('watClock');
+    if (clock) clock.textContent = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Africa/Lagos', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+    }).format(new Date());
+    const drop = document.getElementById('nextDropClock');
+    if (drop) {
+      let next = null;
+      try { next = window.Store && Store.nextDrop ? Store.nextDrop() : null; } catch (e) {}
+      drop.textContent = next ? hms(next - Date.now()) : 'NO ROUTE';
+    }
   }
 
   function mountHeader({ title, back } = {}) {
@@ -172,12 +184,21 @@
     const impersonating = Store.impersonating && Store.impersonating();
     h.innerHTML = `<div class="header-in">
       ${back ? `<a class="back-btn" href="${back}" aria-label="Back">${icon('back')}</a>` : ''}
-      <a class="crest" href="dashboard.html">${crest()}<span class="crest-txt"><b>CSC</b><i>Apartments</i></span></a>
+      <a class="crest" href="dashboard.html">${crest()}<span class="crest-txt"><b>Tranex</b><i>Dispatch network</i></span></a>
       ${title ? `<span class="header-title">${esc(title)}</span>` : ''}
+      <div class="dispatch-data" aria-label="Dispatch timing">
+        <span class="dispatch-readout"><small>WAT</small><b id="watClock">--:--:--</b></span>
+        <span class="dispatch-divider" aria-hidden="true"></span>
+        <span class="dispatch-readout drop"><small>NEXT DROP</small><b id="nextDropClock">NO ROUTE</b></span>
+      </div>
       <span class="header-spacer"></span>
+      <span class="dispatch-health"><i class="status-lamp" aria-hidden="true"></i>LIVE</span>
       <button class="icon-btn" id="hdrCare" aria-label="Customer care">${icon('headset')}</button>
       <button class="icon-btn" id="hdrBell" aria-label="Notifications">${icon('bell')}<i class="dot"></i></button>
     </div>${impersonating ? `<div style="background:#d92d20;color:#fff;padding:9px 14px;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:12px;letter-spacing:.02em">Admin member session <button id="exitImpersonation" type="button" style="border:1px solid rgba(255,255,255,.6);border-radius:999px;background:rgba(255,255,255,.16);color:#fff;padding:6px 10px;font:inherit">Exit preview</button></div>` : ''}`;
+    if (dispatchTicker) clearInterval(dispatchTicker);
+    updateDispatchClock();
+    dispatchTicker = setInterval(updateDispatchClock, 1000);
     const st = () => h.classList.toggle('is-stuck', window.scrollY > 8);
     window.addEventListener('scroll', st, { passive: true }); st();
     h.querySelector('#hdrCare').addEventListener('click', careSheet);

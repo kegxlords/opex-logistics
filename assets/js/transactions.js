@@ -58,7 +58,7 @@
     const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-    a.download = 'csc-transactions.csv';
+    a.download = 'tranex-transactions.csv';
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1500);
     toast('Exported ' + tx.length + ' transactions', 'ok');
@@ -66,8 +66,8 @@
 
   document.addEventListener('DOMContentLoaded', async () => {
     if (!await UI.guard()) return;
-    UI.mountHeader({ title: 'Transactions', back: 'dashboard.html' });
-    UI.mountNav('dashboard.html');
+    UI.mountHeader({ title: 'Garage ledger', back: 'dashboard.html' });
+    UI.mountNav('transactions.html');
     sums(); chips(); list();
     document.getElementById('search').addEventListener('input', debounce(e => {
       query = e.target.value.trim(); list();

@@ -24,18 +24,18 @@
 
     document.getElementById('qr').innerHTML = QR.svg(link, { dark: '#123A8F', scale: 8 });
     document.getElementById('qrPng').addEventListener('click', () => {
-      try { QR.downloadPNG(link, 'csc-' + me.referral_code + '.png'); toast('QR downloaded', 'ok'); }
+      try { QR.downloadPNG(link, 'tranex-' + me.referral_code + '.png'); toast('QR downloaded', 'ok'); }
       catch (e) { toast(e.message, 'err'); }
     });
     document.getElementById('qrSvg').addEventListener('click', () => {
-      QR.downloadSVG(link, 'csc-' + me.referral_code + '.svg'); toast('QR downloaded', 'ok');
+      QR.downloadSVG(link, 'tranex-' + me.referral_code + '.svg'); toast('QR downloaded', 'ok');
     });
 
-    const shareText = `Join me on CSC Apartments — managed residences paying rental income every 24 hours. Use my code ${me.referral_code}: ${link}`;
+    const shareText = `Join me on Tranex — track every lease and income drop from your dispatch board. Use my code ${me.referral_code}: ${link}`;
     document.getElementById('waShare').href = 'https://wa.me/?text=' + encodeURIComponent(shareText);
     document.getElementById('shareBtn').addEventListener('click', async () => {
       if (navigator.share) {
-        try { await navigator.share({ title: 'CSC Apartments', text: shareText, url: link }); }
+        try { await navigator.share({ title: 'Tranex', text: shareText, url: link }); }
         catch (e) { if (e.name !== 'AbortError') copyText(link, 'Referral link copied'); }
       } else copyText(link, 'Referral link copied — paste it anywhere');
     });

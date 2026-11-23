@@ -3,21 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sign In · CSC Apartments</title>
-<meta name="theme-color" content="#1F6FEB">
-<meta name="description" content="CSC Apartments — managed residences with rental income distributed every 24 hours.">
+<title>Sign In · Tranex</title>
+<meta name="theme-color" content="#0F1216">
+<meta name="description" content="Tranex — managed residences with rental income distributed every 24 hours.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/theme.css?v=3">
-<link rel="stylesheet" href="assets/css/layout.css?v=3">
-<link rel="stylesheet" href="assets/css/components.css?v=3">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/theme.css?v=4">
+<link rel="stylesheet" href="assets/css/layout.css?v=4">
+<link rel="stylesheet" href="assets/css/components.css?v=4">
+<link rel="stylesheet" href="assets/css/tranex.css?v=1">
 </head>
 <body data-page="login">
 
 <div class="boot" id="boot"><div class="boot-in">
-  <div class="boot-ring"><span class="crest-mark"><svg viewBox="0 0 40 40"><path d="M20 4 L34 13 V36 H6 V13 Z" fill="none" stroke="#fff" stroke-width="2.4"/><rect x="12" y="19" width="6" height="6" fill="#FFD9EC"/><rect x="22" y="19" width="6" height="6" fill="#fff"/></svg></span></div>
-  <div class="boot-txt">CSC</div>
+  <div class="boot-ring"><span class="crest-mark"><svg viewBox="0 0 40 40" role="img" aria-label="Tranex dispatch mark"><path d="M8 8h24v24H8z" fill="none" stroke="#FFB020" stroke-width="2.4"/><path d="M13 14h14M20 14v13" fill="none" stroke="#FFB020" stroke-width="2.6" stroke-linecap="square"/><path d="M15 27h10" fill="none" stroke="#17C3B2" stroke-width="2.2"/></svg></span></div>
+  <div class="boot-txt">Dispatch sync</div>
 </div></div>
 
 <main class="main main--auth">
@@ -25,8 +26,8 @@
 
   <div class="auth-wrap">
     <section class="auth-card rise rise-1">
-      <h1 class="auth-title">Welcome Back!</h1>
-      <p class="auth-sub">Sign in to manage your residences</p>
+      <h1 class="auth-title">Dispatch Access</h1>
+      <p class="auth-sub">Authorize your session to view the fleet board.</p>
 
       <div class="alert" id="firstRun" role="status" aria-live="polite"></div>
       <div class="alert" id="alert" role="status" aria-live="polite"></div>
@@ -59,7 +60,7 @@
         <button class="btn btn--primary btn--block" type="submit">Sign In</button>
       </form>
 
-      <p class="auth-foot">New to CSC? <a href="register.html">Create an account</a></p>
+      <p class="auth-foot">New to Tranex? <a href="register.html">Create an account</a></p>
       <div class="auth-bonus">🎁 Every new resident receives a welcome bonus instantly on signup.</div>
     </section>
   </div>
@@ -68,8 +69,8 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/config.js?v=4"></script>
 <script src="assets/js/store.js?v=4"></script>
-<script src="assets/js/app.js?v=3"></script>
-<script src="assets/js/auth.js?v=3"></script>
+<script src="assets/js/app.js?v=4"></script>
+<script src="assets/js/auth.js?v=4"></script>
 <script src="assets/js/first-run.js?v=3"></script>
 </body>
 </html>
