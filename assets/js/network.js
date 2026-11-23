@@ -127,16 +127,22 @@
 
   /* ================= PROFILE ================= */
   const DIRECTORY = [
-    ['dashboard.html', 'home', 'Home', 'var(--g-blue)'],
-    ['rents.html', 'rents', 'My Leases', 'var(--g-money)'],
-    ['check-in.html', 'flame', 'Check-In', 'var(--g-pink)'],
-    ['deposit.html', 'in', 'Deposit', 'var(--g-green)'],
-    ['withdraw.html', 'out', 'Withdraw', 'var(--g-red)'],
-    ['bank-card.html', 'bank', 'Bank Cards', 'var(--g-blue)'],
-    ['transactions.html', 'hist', 'Transactions', 'var(--g-money)'],
-    ['refer.html', 'refer', 'Refer & Earn', 'var(--g-pink)'],
-    ['team.html', 'team', 'My Team', 'var(--g-green)'],
-    ['support.html', 'headset', 'Support', 'var(--g-blue)']
+    { title: '01 / Operations', links: [
+      ['dashboard.html', 'home', 'Dispatch board', 'Balance, income and activity', 'amber'],
+      ['rents.html', 'rents', 'My fleet', 'Active leases and income routes', 'green'],
+      ['check-in.html', 'flame', 'Daily check-in', 'Claim today’s attendance reward', 'teal']
+    ] },
+    { title: '02 / Funds & records', links: [
+      ['deposit.html', 'in', 'Deposit', 'Add funds to your account', 'green'],
+      ['withdraw.html', 'out', 'Withdraw', 'Request a payout', 'red'],
+      ['bank-card.html', 'bank', 'Bank cards', 'Manage payout destinations', 'blue'],
+      ['transactions.html', 'hist', 'Transaction ledger', 'Review and export account activity', 'amber']
+    ] },
+    { title: '03 / Crew & support', links: [
+      ['refer.html', 'refer', 'Refer & earn', 'Share your invitation link and QR', 'teal'],
+      ['team.html', 'team', 'My team', 'View your referral network', 'blue'],
+      ['support.html', 'headset', 'Support desk', 'Contact Tranex care', 'amber']
+    ] }
   ];
 
   function initProfile() {
@@ -166,9 +172,23 @@
       <div class="kv"><span class="k">Account status</span><span class="v"><span class="tag tag--${me.is_active ? 'live' : 'out'}">${me.is_active ? 'Active' : 'Suspended'}</span></span></div>`;
     A.wireCopy(document.getElementById('details'));
 
-    document.getElementById('dir').innerHTML = DIRECTORY.map(([href, ic, label, bg]) =>
-      `<a href="${href}"><i style="background:${bg}">${icon(ic)}</i>${label}</a>`).join('') +
-      `<a href="#" id="logout" class="danger"><i style="background:var(--g-red)">${icon('logout')}</i>Sign out</a>`;
+    document.getElementById('dir').innerHTML = DIRECTORY.map(group => `
+      <section class="dir-group">
+        <h4>${group.title}</h4>
+        <div class="dir-links">${group.links.map(([href, ic, label, detail, tone]) => `
+          <a class="dir-link" href="${href}">
+            <i class="dir-icon dir-icon--${tone}">${icon(ic)}</i>
+            <span><b>${label}</b><small>${detail}</small></span><em aria-hidden="true">›</em>
+          </a>`).join('')}
+        </div>
+      </section>`).join('') + `
+      <section class="dir-group dir-account">
+        <h4>04 / Session</h4>
+        <div class="dir-links"><a href="#" id="logout" class="dir-link danger">
+          <i class="dir-icon dir-icon--red">${icon('logout')}</i>
+          <span><b>Sign out</b><small>End this member session</small></span><em aria-hidden="true">›</em>
+        </a></div>
+      </section>`;
 
     document.getElementById('community').innerHTML = `
       <a class="wa-btn wa-btn--wa" href="${esc(s.whatsapp_link)}" target="_blank" rel="noopener">${icon('wa')}<span>WhatsApp Group<small>Alerts &amp; community</small></span>${icon('chev')}</a>

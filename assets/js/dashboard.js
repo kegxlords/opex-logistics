@@ -153,22 +153,16 @@
     if (!root) return;
     const s = Store.settings();
     root.innerHTML = `
-      <button class="qa-item qa--blue" type="button" data-qa="deposit">
-        <span class="qa-orb">${icon('in')}</span><b>Deposit</b></button>
-      <button class="qa-item qa--red" type="button" data-qa="withdraw">
-        <span class="qa-orb">${icon('out')}</span><b>Withdraw</b></button>
-      <button class="qa-item qa--pink" type="button" data-qa="checkin">
+      <a class="qa-item qa--blue" href="deposit.html">
+        <span class="qa-orb">${icon('in')}</span><b>Deposit</b></a>
+      <a class="qa-item qa--red" href="withdraw.html">
+        <span class="qa-orb">${icon('out')}</span><b>Withdraw</b></a>
+      <a class="qa-item qa--pink" href="check-in.html">
         <span class="qa-orb">${icon('flame')}</span><b>Check-In</b>
-        <i class="pip hide" id="ciPip">1</i></button>
+        <i class="pip hide" id="ciPip">1</i></a>
       <a class="qa-item qa--green" href="${esc(s.whatsapp_link)}" target="_blank" rel="noopener">
         <span class="qa-orb">${icon('wa')}</span><b>WhatsApp</b></a>`;
 
-    root.querySelectorAll('[data-qa]').forEach(b => b.addEventListener('click', () => {
-      const k = b.dataset.qa;
-      if (k === 'deposit') A.depositSheet(refresh);
-      else if (k === 'withdraw') A.withdrawSheet(refresh);
-      else A.checkinSheet(refresh);
-    }));
   }
 
   function paintPip() {

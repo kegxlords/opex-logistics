@@ -153,7 +153,6 @@
   const NAV = [
     ['dashboard.html', 'home', 'Board'],
     ['rents.html', 'rents', 'Fleet'],
-    ['transactions.html', 'hist', 'Garage'],
     ['team.html', 'team', 'Crew'],
     ['profile.html', 'user', 'Account']
   ];
