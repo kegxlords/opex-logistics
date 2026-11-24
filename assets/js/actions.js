@@ -93,11 +93,21 @@
   /* ---------------- deposit ---------------- */
   function bankBlock() {
     const s = Store.settings();
-    return `<div class="card" style="background:var(--blue-tint);border-color:var(--blue-tint-2)">
-      <div class="kv"><span class="k">Bank</span><span class="v">${esc(s.bank_name)} ${copyBtn(s.bank_name)}</span></div>
-      <div class="kv"><span class="k">Account number</span><span class="v">${esc(s.account_number)} ${copyBtn(s.account_number)}</span></div>
-      <div class="kv"><span class="k">Account name</span><span class="v">${esc(s.account_name)} ${copyBtn(s.account_name)}</span></div>
-    </div>`;
+    const accounts = [1, 2].map(index => ({
+      bank: String(s[`deposit_bank_${index}_name`] || '').trim(),
+      number: String(s[`deposit_bank_${index}_account_number`] || '').trim(),
+      name: String(s[`deposit_bank_${index}_account_name`] || '').trim()
+    })).filter(account => account.bank && account.number && account.name);
+    if (!accounts.length && s.bank_name && s.account_number && s.account_name) {
+      accounts.push({ bank: s.bank_name, number: s.account_number, name: s.account_name });
+    }
+    if (!accounts.length) return '<div class="card c-muted">Deposit account details are unavailable. Please contact support.</div>';
+    return `<div style="display:grid;gap:10px">${accounts.map((account, index) => `<div class="card" style="background:var(--blue-tint);border-color:var(--blue-tint-2);margin:0">
+      <div class="c-muted" style="font-size:12px;font-weight:700;margin-bottom:8px">Deposit option ${index + 1}</div>
+      <div class="kv"><span class="k">Bank</span><span class="v">${esc(account.bank)} ${copyBtn(account.bank)}</span></div>
+      <div class="kv"><span class="k">Account number</span><span class="v">${esc(account.number)} ${copyBtn(account.number)}</span></div>
+      <div class="kv"><span class="k">Account name</span><span class="v">${esc(account.name)} ${copyBtn(account.name)}</span></div>
+    </div>`).join('')}</div>`;
   }
 
   function depositSheet(onDone) {
@@ -105,6 +115,7 @@
     const l = layer(`
       <div class="sheet-head"><h3>${icon('in')} Fund your wallet</h3>
         <button class="modal-x" data-close style="position:static">${icon('x')}</button></div>
+      <p class="c-muted" style="font-size:13px;margin:0 0 10px">Send your transfer to either account below.</p>
       ${bankBlock()}
       <div class="alert alert--info show" style="margin-top:14px">${icon('info')}<span>Transfer exactly the amount you enter, then submit below.</span></div>
       <form id="acDep">
