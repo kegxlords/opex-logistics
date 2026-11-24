@@ -152,6 +152,7 @@
   /* ---------------- shell ---------------- */
   const NAV = [
     ['dashboard.html', 'home', 'Board'],
+    ['packages.html', 'building', 'Packages'],
     ['rents.html', 'rents', 'Fleet'],
     ['team.html', 'team', 'Crew'],
     ['profile.html', 'user', 'Account']

@@ -3,7 +3,7 @@
    ============================================================ */
 (function () {
   'use strict';
-  const { icon, esc, naira, dt, dOnly, toast, layer, closeLayer, debounce, countTo } = UI;
+  const { icon, esc, naira, dt, dOnly, toast, debounce, countTo } = UI;
   const A = Actions;
 
   const refLink = () => location.origin + location.pathname.replace(/[^/]*$/, '') + 'register.html?ref=' + Store.me().referral_code;
@@ -147,30 +147,10 @@
 
   function initProfile() {
     const me = Store.me(), s = Store.settings(), w = Store.wallet();
-    const ls = Store.leases();
-
-    document.getElementById('hero').innerHTML = `
-      <div class="p-hero">
-        <div class="p-avatar">${initial(me.full_name)}</div>
-        <h2>${esc(me.full_name || 'Member')}</h2>
-        <p>${esc(me.email || '')}</p>
-        <p style="margin-top:8px;font-size:11px;letter-spacing:.1em;text-transform:uppercase">Resident since ${dOnly(me.created_at)}</p>
-      </div>`;
-
     document.getElementById('stats').innerHTML = `
       <div class="p-stat"><div class="k">Balance</div><div class="v c-blue">${naira(w.balance)}</div></div>
       <div class="p-stat"><div class="k">Funded</div><div class="v c-green">${naira(me.total_funded || 0)}</div></div>
       <div class="p-stat"><div class="k">Withdrawn</div><div class="v c-pink">${naira(me.total_withdrawn || 0)}</div></div>`;
-
-    document.getElementById('details').innerHTML = `
-      <div class="kv"><span class="k">Full name</span><span class="v" style="font-size:13px">${esc(me.full_name || '—')}</span></div>
-      <div class="kv"><span class="k">Email</span><span class="v" style="font-size:12.5px">${esc(me.email || '—')}</span></div>
-      <div class="kv"><span class="k">Phone</span><span class="v" style="font-size:13px">${esc(me.phone || 'Not set')}</span></div>
-      <div class="kv"><span class="k">Referral code</span><span class="v" style="font-size:13px">${esc(me.referral_code)} ${A.copyBtn(me.referral_code)}</span></div>
-      <div class="kv"><span class="k">Active leases</span><span class="v">${ls.filter(l => l.status === 'active').length}</span></div>
-      <div class="kv"><span class="k">Attendance streak</span><span class="v c-pink">${me.streak_days || 0} days</span></div>
-      <div class="kv"><span class="k">Account status</span><span class="v"><span class="tag tag--${me.is_active ? 'live' : 'out'}">${me.is_active ? 'Active' : 'Suspended'}</span></span></div>`;
-    A.wireCopy(document.getElementById('details'));
 
     document.getElementById('dir').innerHTML = DIRECTORY.map(group => `
       <section class="dir-group">
@@ -194,28 +174,6 @@
       <a class="wa-btn wa-btn--wa" href="${esc(s.whatsapp_link)}" target="_blank" rel="noopener">${icon('wa')}<span>WhatsApp Group<small>Alerts &amp; community</small></span>${icon('chev')}</a>
       <a class="wa-btn wa-btn--cs" href="${esc(s.telegram_link)}" target="_blank" rel="noopener">${icon('refer')}<span>Telegram Channel<small>Announcements</small></span>${icon('chev')}</a>
       <a class="wa-btn" style="background:var(--g-pink);box-shadow:var(--sh-pink)" href="support.html">${icon('headset')}<span>Customer Service<small>${esc(s.support_email)}</small></span>${icon('chev')}</a>`;
-
-    document.getElementById('editPhone').addEventListener('click', () => {
-      const l = layer(`
-        <div class="sheet-head"><h3>${icon('user')} Phone number</h3>
-          <button class="modal-x" data-close style="position:static">${icon('x')}</button></div>
-        <form id="phForm">
-          <div class="field-row"><label class="label" for="ph">Phone</label>
-            <div class="input-wrap">${icon('user')}<input class="input" id="ph" inputmode="tel" value="${esc(me.phone || '')}" placeholder="08031234567"></div>
-            <p class="hint">Used by our care team only. Your email remains your sign-in.</p></div>
-          <button class="btn btn--blue btn--block" type="submit">Save</button>
-        </form>`, 'sheet');
-      l.querySelector('#phForm').addEventListener('submit', async e => {
-        e.preventDefault();
-        const btn = e.target.querySelector('button[type=submit]'), old = btn.innerHTML;
-        btn.disabled = true; btn.innerHTML = '<i class="spin"></i> Saving…';
-        try {
-          await Store.updateProfile({ phone: l.querySelector('#ph').value.trim() });
-          closeLayer(); toast('Phone number updated', 'ok', { undo: () => { Store.undo(); initProfile(); toast('Reverted', 'info'); } });
-          initProfile();
-        } catch (err) { toast(err.message, 'err'); btn.disabled = false; btn.innerHTML = old; }
-      });
-    });
 
     document.getElementById('logout').addEventListener('click', e => {
       e.preventDefault();

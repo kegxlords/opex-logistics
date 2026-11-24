@@ -1,55 +1,10 @@
 /* ============================================================
    CSC APARTMENTS — Auth controller (production)
-   login · register (captcha) · forgot · reset — no demo paths
+   login · register · forgot · reset — no demo paths
    ============================================================ */
 (function () {
   'use strict';
   const { icon, esc, toast, bootOff, guard } = UI;
-
-  /* ---------------- canvas captcha ---------------- */
-  const Captcha = (() => {
-    let value = '', canvas = null, ctx = null;
-    function draw() {
-      if (!canvas) return;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const w = canvas.clientWidth || 112, h = canvas.clientHeight || 50;
-      canvas.width = w * dpr; canvas.height = h * dpr;
-      ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
-      ctx.fillStyle = '#171C23'; ctx.fillRect(0, 0, w, h);
-      const hues = ['#FFB020', '#17C3B2', '#FF4D4F', '#3DDC7A', '#4DA3FF'];
-      for (let i = 0; i < 7; i++) {
-        ctx.strokeStyle = hues[i % hues.length] + '55';
-        ctx.lineWidth = 1 + Math.random();
-        ctx.beginPath();
-        ctx.moveTo(Math.random() * w, Math.random() * h);
-        ctx.bezierCurveTo(Math.random() * w, Math.random() * h, Math.random() * w, Math.random() * h, Math.random() * w, Math.random() * h);
-        ctx.stroke();
-      }
-      for (let i = 0; i < 34; i++) {
-        ctx.fillStyle = hues[i % hues.length] + '99';
-        ctx.fillRect(Math.random() * w, Math.random() * h, 1.6, 1.6);
-      }
-      value = String(Math.floor(1000 + Math.random() * 9000));
-      const step = w / 4;
-      for (let i = 0; i < 4; i++) {
-        ctx.save();
-        ctx.translate(step * i + step / 2, h / 2 + (Math.random() * 6 - 3));
-        ctx.rotate((Math.random() * 34 - 17) * Math.PI / 180);
-        ctx.font = '700 ' + (20 + Math.random() * 6) + 'px "Barlow Condensed", system-ui, sans-serif';
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillStyle = hues[(i + 1) % hues.length];
-        ctx.fillText(value[i], 0, 0);
-        ctx.restore();
-      }
-      ctx.strokeStyle = 'rgba(255,255,255,.22)'; ctx.lineWidth = 1.4;
-      ctx.beginPath(); ctx.moveTo(4, h * .62); ctx.lineTo(w - 4, h * .38); ctx.stroke();
-    }
-    return {
-      mount(el) { canvas = el; draw(); },
-      refresh() { draw(); },
-      check(v) { return String(v).trim() === value; }
-    };
-  })();
 
   /* ---------------- helpers ---------------- */
   function alertBox(id) {
@@ -138,11 +93,6 @@
     if (page === 'register') {
       const a = alertBox('alert');
       const form = document.getElementById('regForm');
-      Captcha.mount(document.getElementById('capCanvas'));
-      document.getElementById('capRefresh').addEventListener('click', () => {
-        Captcha.refresh();
-        document.getElementById('captcha').value = '';
-      });
       strength(document.getElementById('password'), document.getElementById('meter'));
 
       const ref = new URLSearchParams(location.search).get('ref');
@@ -154,33 +104,24 @@
 
       form.addEventListener('submit', async e => {
         e.preventDefault(); a.hide();
-        const capEl = document.getElementById('captcha');
-        if (!Captcha.check(capEl.value)) {
-          a.show('Captcha does not match. A fresh code has been generated.');
-          Captcha.refresh(); capEl.value = '';
-          const w = document.getElementById('capWrap');
-          w.classList.add('err'); setTimeout(() => w.classList.remove('err'), 1600);
-          return;
-        }
         const btn = form.querySelector('button[type=submit]');
-        busy(btn, true, 'Creating account…');
+        busy(btn, true, 'Creating access pass…');
         try {
           const r = await Store.register({
-            full_name: document.getElementById('name').value,
             email: document.getElementById('email').value,
             password: document.getElementById('password').value,
             invite: document.getElementById('invite').value.trim()
           });
           if (r.needsVerify) {
             a.show('Account created. Check ' + r.email + ' for your confirmation link, then sign in.', 'ok');
-            busy(btn, false, 'Create Account'); form.reset(); Captcha.refresh();
+            busy(btn, false, 'Create access pass'); form.reset();
           } else {
             a.show('Account created with a ' + UI.naira(Store.setting('welcome_bonus')) + ' welcome bonus. Taking you to sign in…', 'ok');
             setTimeout(() => location.replace('index.html'), 1100);
           }
         } catch (err) {
-          a.show(err.message); Captcha.refresh(); document.getElementById('captcha').value = '';
-          busy(btn, false, 'Create Account');
+          a.show(err.message);
+          busy(btn, false, 'Create access pass');
         }
       });
     }

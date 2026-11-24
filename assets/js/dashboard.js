@@ -1,17 +1,13 @@
 /* ============================================================
    CSC APARTMENTS — Member home
-   Banner · balance · 4 actions · lease catalogue only.
-   Rented packages live on rents.html, not here.
+   Control tower · balances · actions · active routes · manifest.
    ============================================================ */
 (function () {
   'use strict';
-  const { icon, esc, naira, dt, hms, toast, layer, closeLayer, confirmSheet, imgWithFallback } = UI;
+  const { icon, esc, naira, dt, hms, toast, layer, closeLayer } = UI;
   const A = Actions;
-  const CFG = window.PINNACLE;
-
   let timers = [];
   const clearTimers = () => { timers.forEach(clearInterval); timers = []; };
-  const unitImg = u => imgWithFallback(u.image_url || CFG.IMAGES.units[u.slug], Store.facade(u.slug, u.name.length * 7), u.name);
 
   /* ================= welcome popup — every visit ================= */
   function welcome(me, s) {
@@ -39,55 +35,6 @@
     if (b) b.addEventListener('click', () => { closeLayer(); setTimeout(UI.careSheet, 280); });
   }
 
-  /* ================= carousel ================= */
-  function carousel() {
-    const root = document.getElementById('carousel');
-    if (!root) return;
-    const copies = [
-      ['Riverside Tower', 'Waterfront residences · Lekki Phase 1'],
-      ['The CSC Collection', 'Six tiers of managed rental income'],
-      ['Income Every 24 Hours', 'Automatic drops, tracked to the second']
-    ];
-    root.innerHTML = `
-      <div class="carousel-track" id="cTrack">
-        ${CFG.IMAGES.banners.map((src, i) => `
-          <div class="slide">
-            ${imgWithFallback(src, Store.banner(i), copies[i][0])}
-            <div class="slide-copy"><b>${copies[i][0]}</b><span>${copies[i][1]}</span></div>
-          </div>`).join('')}
-      </div>
-      <button class="carousel-nav prev" id="cPrev" aria-label="Previous slide">${icon('back')}</button>
-      <button class="carousel-nav next" id="cNext" aria-label="Next slide">${icon('chev')}</button>
-      <div class="dots" id="cDots">
-        ${copies.map((_, i) => `<button type="button" aria-label="Slide ${i + 1}" class="${i === 0 ? 'on' : ''}"></button>`).join('')}
-      </div>`;
-
-    const track = root.querySelector('#cTrack');
-    const dots = [...root.querySelectorAll('.dots button')];
-    let idx = 0, auto = null;
-    const go = i => {
-      idx = (i + copies.length) % copies.length;
-      track.style.transform = `translateX(-${idx * 100}%)`;
-      dots.forEach((d, k) => d.classList.toggle('on', k === idx));
-    };
-    const start = () => { clearInterval(auto); auto = setInterval(() => go(idx + 1), 5000); };
-    dots.forEach((d, i) => d.addEventListener('click', () => { go(i); start(); }));
-    root.querySelector('#cPrev').addEventListener('click', () => { go(idx - 1); start(); });
-    root.querySelector('#cNext').addEventListener('click', () => { go(idx + 1); start(); });
-    let sx = null;
-    root.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
-    root.addEventListener('touchend', e => {
-      if (sx === null) return;
-      const dx = e.changedTouches[0].clientX - sx;
-      if (Math.abs(dx) > 40) { go(idx + (dx < 0 ? 1 : -1)); start(); }
-      sx = null;
-    }, { passive: true });
-    root.addEventListener('mouseenter', () => clearInterval(auto));
-    root.addEventListener('mouseleave', start);
-    start();
-    timers.push(auto);
-  }
-
   /* ================= balance ================= */
   function paintBalance() {
     const w = Store.wallet();
@@ -111,7 +58,7 @@
     if (!root) return;
     const leases = Store.leases().filter(lease => lease.status === 'active' && lease.days_paid < lease.unit.duration_days);
     if (!leases.length) {
-      root.innerHTML = `<div class="board-empty">NO ACTIVE ROUTES // OPEN THE FLEET BOARD TO LEASE A UNIT.</div>`;
+      root.innerHTML = `<div class="board-empty">NO ACTIVE ROUTES // <a href="packages.html">BROWSE AVAILABLE PACKAGES →</a></div>`;
       return;
     }
     root.innerHTML = leases.map((lease, index) => {
@@ -168,90 +115,6 @@
   function paintPip() {
     const pip = document.getElementById('ciPip');
     if (pip) pip.classList.toggle('hide', Store.checkinState().claimed);
-  }
-
-  /* ================= lease catalogue (to-lease only) ================= */
-  function paintUnits() {
-    const root = document.getElementById('units');
-    if (!root) return;
-    const list = Store.units();
-
-    if (!list.length) {
-      root.innerHTML = `<div class="card"><div class="empty">
-        <div class="empty-art">${icon('building')}</div>
-          <b>No units in dispatch</b>
-          <p>Management has not released a new fleet unit yet. Check back shortly.</p>
-      </div></div>`;
-      return;
-    }
-
-    root.innerHTML = list.map(u => {
-      const left = Math.max(0, u.purchase_limit - Store.ownedCount(u.id));
-      const live = u.status === 'live';
-      const total = u.daily_yield * u.duration_days;
-      return `<article class="unit rise ${live && !left ? 'unit--capped' : ''}">
-        <div class="unit-img">${unitImg(u)}<span class="ribbon">${esc(u.tier)}</span></div>
-        <div class="unit-body">
-          <div class="unit-top">
-            <h3 class="unit-name">${esc(u.name)}</h3>
-            <span class="tag tag--${live ? 'live' : 'soon'}">${live ? 'Live' : 'Upcoming'}</span>
-          </div>
-          <div class="unit-specs">
-            <span class="chip">${icon('bed')} ${u.bedrooms} bed</span>
-            <span class="chip">${icon('bath')} ${u.bathrooms} bath</span>
-            <span class="chip">${icon('area')} ${u.sqm} m²</span>
-          </div>
-          <div class="unit-econ">
-            <div class="econ"><span class="k">Lease price</span><span class="v c-blue">${naira(u.price)}</span></div>
-            <div class="econ"><span class="k">Every 24h</span><span class="v c-green">${naira(u.daily_yield)}</span></div>
-            <div class="econ"><span class="k">Income days</span><span class="v">${u.duration_days}</span></div>
-            <div class="econ"><span class="k">Total return</span><span class="v c-pink">${naira(total)}</span></div>
-          </div>
-          <div class="unit-foot">
-            <span class="limit">${live ? `<b>${left}</b> of ${u.purchase_limit} left` : 'Opens soon'}</span>
-            <button class="btn btn--${live && left ? 'primary' : 'ghost'} btn--sm"
-              type="button" data-rent="${u.id}" ${(!live || !left) ? 'disabled' : ''}>
-              ${live ? (left ? 'Lease' : 'Limit reached') : 'Upcoming'}
-            </button>
-          </div>
-        </div>
-      </article>`;
-    }).join('');
-
-    root.querySelectorAll('[data-rent]').forEach(b => b.addEventListener('click', () => rentFlow(b.dataset.rent)));
-    [...root.querySelectorAll('.unit')].forEach((el, i) => { el.style.animationDelay = (0.04 * i) + 's'; });
-  }
-
-  function rentFlow(id) {
-    const u = Store.unit(id);
-    const w = Store.wallet();
-    confirmSheet({
-      title: 'Confirm lease',
-      confirmText: 'Lease for ' + naira(u.price),
-      kind: 'primary',
-      body: `
-        <div style="display:flex;gap:12px;align-items:center;margin-bottom:14px">
-          <div class="lease-thumb">${unitImg(u)}</div>
-          <div><b class="dsp" style="font-size:15px">${esc(u.name)}</b>
-            <div class="c-muted" style="font-size:12px;font-weight:600">${esc(u.tier)} · ${u.sqm} m²</div></div>
-        </div>
-        <div class="total-box">
-          <div class="kv"><span class="k">Lease price</span><span class="v">${naira(u.price)}</span></div>
-          <div class="kv"><span class="k">Income every 24 hours</span><span class="v c-green">${naira(u.daily_yield)}</span></div>
-          <div class="kv"><span class="k">Income days</span><span class="v">${u.duration_days}</span></div>
-          <div class="kv"><span class="k">Total return</span><span class="v c-pink">${naira(u.daily_yield * u.duration_days)}</span></div>
-          <div class="kv grand"><span class="k">Balance after lease</span><span class="v">${naira(Math.max(0, w.balance - w.locked - u.price))}</span></div>
-        </div>
-        <p class="c-muted" style="font-size:12px;font-weight:600">Your first drop lands exactly 24 hours from now, then every 24 hours until all ${u.duration_days} income days are paid. Track it under My Leases.</p>`,
-      onConfirm: async () => {
-        const r = await Store.rent(id);
-        toast(r.unit.name + ' leased', 'ok', {
-          sub: 'First drop in 24 hours · view it under My Leases',
-          undo: () => { Store.undo(); refresh(); toast('Lease reversed', 'info'); }
-        });
-        refresh();
-      }
-    });
   }
 
   /* ================= history sheet ================= */
@@ -312,7 +175,8 @@
   /* ================= refresh ================= */
   function refresh() {
     paintBalance();
-    paintUnits();
+    const packageCount = document.getElementById('packageCount');
+    if (packageCount) packageCount.textContent = String(Store.units().length);
     paintActiveLeases();
     paintManifest();
     paintPip();

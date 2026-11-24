@@ -49,8 +49,8 @@
       root.innerHTML = `<div class="card" style="grid-column:1/-1"><div class="empty">
         <div class="empty-art">${icon('rents')}</div>
         <b>${filter === 'completed' ? 'No ended leases' : 'No active leases'}</b>
-        <p>Lease a residence from the home page and income begins dropping every 24 hours.</p>
-        <a class="btn btn--primary btn--sm" href="dashboard.html" style="margin-top:14px">Browse residences</a>
+        <p>${filter === 'completed' ? 'Completed leases will appear here when a route reaches its final drop.' : 'Choose a package to start a new income route.'}</p>
+        ${filter === 'completed' ? '' : '<a class="btn btn--primary btn--sm" href="packages.html" style="margin-top:14px">Browse packages</a>'}
       </div></div>`;
       return;
     }

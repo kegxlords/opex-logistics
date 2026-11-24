@@ -425,13 +425,12 @@
     },
 
     /* ---- auth ---- */
-    async register({ email, full_name, password, invite }) {
+    async register({ email, password, invite }) {
       email = String(email || '').trim().toLowerCase();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) throw new Error('Enter a valid email address.');
-      if (!full_name || full_name.trim().length < 3) throw new Error('Enter your full name.');
       if (!password || password.length < 6) throw new Error('Password must be at least 6 characters.');
       if (LIVE) {
-        const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name, invite: invite || null } } });
+        const { data, error } = await sb.auth.signUp({ email, password, options: { data: { invite: invite || null } } });
         if (error) throw new Error(error.message);
         return { needsVerify: !data.session, email };
       }
@@ -443,7 +442,7 @@
         ref = inv.id; u2 = inv.referred_by; u3 = inv.upline_2;
       }
       const u = {
-        id: uid(), email, phone: '', full_name: full_name.trim(), pass: hash(password),
+        id: uid(), email, phone: '', full_name: 'Member', pass: hash(password),
         referral_code: 'PNC' + code6().slice(0, 3), referred_by: ref, upline_2: u2, upline_3: u3,
         is_admin: false, is_active: true, has_funded: false, total_funded: 0, total_withdrawn: 0,
         streak_days: 0, longest_streak: 0, last_checkin: null, verified: true, created_at: now()

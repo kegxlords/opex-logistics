@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="assets/css/theme.css?v=4">
 <link rel="stylesheet" href="assets/css/layout.css?v=4">
 <link rel="stylesheet" href="assets/css/components.css?v=4">
-<link rel="stylesheet" href="assets/css/tranex.css?v=2">
+<link rel="stylesheet" href="assets/css/tranex.css?v=3">
 </head>
 <body data-page="dashboard">
 
@@ -24,17 +24,21 @@
 <div class="app">
   <header id="hdr"></header>
 
-  <main class="main">
-    <section class="dispatch-banner rise rise-1" aria-label="Tranex dispatch summary">
-      <div>
-        <span class="eyebrow">Tranex / member operations</span>
-        <h1>Capital in motion.</h1>
-        <p>Track every lease, income drop and balance movement from one dispatch board.</p>
+  <main class="main dashboard-main">
+    <section class="control-hero rise rise-1" aria-label="Tranex control tower">
+      <div class="control-copy">
+        <span class="eyebrow">Tranex / member control tower</span>
+        <h1>Capital<br><em>in motion.</em></h1>
+        <p>Good shift, <b id="greet">Member</b>. Your balances, live routes and account actions are standing by.</p>
       </div>
-      <div class="banner-code"><b>FLEET CONTROL · 01</b>NETWORK STATUS / LIVE<br>OPERATOR / <span id="greet">MEMBER</span></div>
+      <div class="control-stamp" aria-label="System status">
+        <span class="stamp-grid" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <small>NETWORK STATUS</small><b><i class="status-lamp" aria-hidden="true"></i> LIVE</b>
+        <span class="stamp-code">OPERATOR / <strong>MEMBER</strong><br>BOARD / 01—A</span>
+      </div>
     </section>
 
-    <div class="dispatch-grid">
+    <div class="dispatch-grid control-grid">
       <div class="dispatch-left">
         <section class="balance rise rise-2" aria-label="Wallet balances">
           <div class="balance-cell"><div class="k">Available balance</div><div class="v odometer" id="balMain" aria-live="polite">₦0</div></div>
@@ -43,26 +47,30 @@
           <button class="balance-hist" id="histBtn" type="button">Open ledger</button>
         </section>
 
-        <section class="qa rise rise-3" id="qa" aria-label="Quick actions"></section>
+        <section class="quick-console rise rise-3" aria-label="Quick actions">
+          <div class="quick-console-head"><span class="eyebrow">Control shortcuts</span><span>SELECT DESTINATION ↘</span></div>
+          <div class="qa" id="qa"></div>
+        </section>
       </div>
 
       <section class="board-panel rise rise-4" aria-labelledby="activeBoardTitle">
         <div class="sec-head">
           <div><span class="eyebrow">Live departures</span><h2 id="activeBoardTitle">Active fundings</h2></div>
-          <a class="sec-link" href="rents.html">Open fleet →</a>
+          <a class="sec-link" href="rents.html">My fleet →</a>
         </div>
         <div class="departure-head" aria-hidden="true"><span>ROUTE / UNIT</span><span>FUND</span><span>PER 24H</span><span>DAYS</span><span>TOTAL</span><span>STATUS</span></div>
         <div class="departure-board" id="activeLeases" aria-live="polite"></div>
       </section>
     </div>
 
-    <section class="sec rise rise-5" style="margin-top:22px">
-      <div class="sec-head">
-        <div><span class="eyebrow">Fleet / departures</span><h2>Available fleet</h2></div>
-        <a class="sec-link" href="rents.html">My active leases →</a>
+    <section class="package-launch rise rise-5" aria-labelledby="packageLaunchTitle">
+      <div class="package-orbit" aria-hidden="true"><i></i><i></i><i></i><b>TX</b></div>
+      <div class="package-copy">
+        <span class="eyebrow">Fleet access / <b id="packageCount">—</b> packages listed</span>
+        <h2 id="packageLaunchTitle">Choose your next route.</h2>
+        <p>Compare every available lease package and its income schedule on the dedicated fleet page.</p>
       </div>
-      <div class="departure-head fleet-head" aria-hidden="true"><span>UNIT / PLAN</span><span>SPECIFICATION</span><span>FUND · PER 24H · DAYS · TOTAL</span><span>STATUS / ACTION</span></div>
-      <div class="units" id="units"></div>
+      <a class="package-launch-link" href="packages.html">Browse packages <span aria-hidden="true">↗</span></a>
     </section>
 
     <section class="manifest-strip rise rise-6" aria-label="Member manifest">
@@ -83,9 +91,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/config.js?v=4"></script>
-<script src="assets/js/store.js?v=4"></script>
-<script src="assets/js/app.js?v=5"></script>
+<script src="assets/js/store.js?v=5"></script>
+<script src="assets/js/app.js?v=6"></script>
 <script src="assets/js/actions.js?v=3"></script>
-<script src="assets/js/dashboard.js?v=6"></script>
+<script src="assets/js/dashboard.js?v=8"></script>
 </body>
 </html>
