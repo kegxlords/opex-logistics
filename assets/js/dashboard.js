@@ -147,31 +147,6 @@
     paint();
   }
 
-  /* ================= rewards / referral sheet ================= */
-  function giftSheet() {
-    const s = Store.settings();
-    const me = Store.me();
-    const link = location.origin + location.pathname.replace(/[^/]*$/, '') + 'register.html?ref=' + me.referral_code;
-    const l = layer(`
-      <div class="sheet-head"><h3>${icon('gift')} Rewards &amp; codes</h3>
-        <button class="modal-x" data-close style="position:static">${icon('x')}</button></div>
-      <div class="card" style="background:var(--pink-tint);border-color:rgba(236,46,134,.24);margin-bottom:14px">
-        <h4 style="margin-bottom:6px">Invite residents, earn on 3 levels</h4>
-        <p class="c-muted" style="font-size:12.5px;font-weight:600">Level 1 pays ${s.referral_l1}% · Level 2 pays ${s.referral_l2}% · Level 3 pays ${s.referral_l3}% of every funded deposit in your network.</p>
-      </div>
-      <div class="code-big">${esc(me.referral_code)}</div>
-      <div class="ref-box" style="margin-top:12px">
-        <input id="gLink" readonly value="${esc(link)}">
-        <button class="btn btn--primary btn--sm" type="button" id="gCopy">Copy</button>
-      </div>
-      <a class="btn btn--ghost btn--block btn--sm" style="margin-top:10px" href="refer.html">Open referral tools &amp; QR</a>`, 'sheet');
-    l.querySelector('#gCopy').addEventListener('click', () => {
-      navigator.clipboard.writeText(link)
-        .then(() => toast('Referral link copied', 'ok'))
-        .catch(() => { l.querySelector('#gLink').select(); toast('Select and copy the link', 'info'); });
-    });
-  }
-
   /* ================= refresh ================= */
   function refresh() {
     paintBalance();
@@ -207,7 +182,6 @@
     timers.push(boardTicker);
 
     document.getElementById('histBtn').addEventListener('click', historySheet);
-    document.getElementById('fab').addEventListener('click', giftSheet);
 
     window.addEventListener('pinnacle:income', e => {
       refresh();

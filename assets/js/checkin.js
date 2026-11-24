@@ -1,17 +1,22 @@
 /* ============================================================
-   CSC APARTMENTS — Daily attendance
+   TRANEX — Daily attendance control
    ============================================================ */
 (function () {
   'use strict';
   const { icon, esc, naira, dOnly, toast, countTo } = UI;
 
   function render() {
-    const st = Store.checkinState(), s = Store.settings(), me = Store.me();
+    const st = Store.checkinState(), s = Store.settings();
 
     document.getElementById('streak').innerHTML = `
-      <div class="streak"><span class="streak-flame">🔥</span>
-        <div style="flex:1"><b>${st.streak}</b><span>day streak · personal best ${st.longest || 0}</span></div>
-        <div style="text-align:right"><b style="font-size:18px">${naira(s.checkin_bonus)}</b><span>base per day</span></div>
+      <div class="streak checkin-streak">
+        <span class="checkin-streak-icon" aria-hidden="true">${icon('flame')}</span>
+        <div class="checkin-streak-content">
+          <div class="checkin-streak-meta"><span>Current streak</span><span class="checkin-streak-state">${st.claimed ? 'Claim complete' : 'Awaiting check-in'}</span></div>
+          <div class="checkin-streak-value"><b>${st.streak}</b><span>days</span></div>
+          <span class="checkin-streak-best">Personal best <b>${st.longest || 0} days</b></span>
+        </div>
+        <div class="checkin-daily-base"><span>BASE BONUS</span><strong>${naira(s.checkin_bonus)}</strong></div>
       </div>`;
 
     const pct = st.streak >= 30 ? s.streak_30 : st.streak >= 14 ? s.streak_14 : st.streak >= 7 ? s.streak_7 : 0;
@@ -19,18 +24,22 @@
 
     document.getElementById('claim').innerHTML = `
       <div class="claim-hero">
-        <div class="k">${st.claimed ? 'Claimed today' : 'Available to claim'}</div>
+        <div class="checkin-claim-top">
+          <span class="checkin-claim-tag"><i aria-hidden="true"></i>${st.claimed ? 'Credit recorded' : 'Bonus available'}</span>
+          <span class="checkin-claim-cycle">Daily cycle / 24h</span>
+        </div>
+        <div class="k">${st.claimed ? 'Check-in complete for today' : 'Today’s attendance reward'}</div>
         <div class="amt" id="claimAmt">${naira(st.claimed ? 0 : todayValue)}</div>
-        ${pct ? `<div style="font-size:12px;font-weight:800;margin-top:6px">includes +${pct}% streak boost</div>` : ''}
+        <div class="checkin-claim-boost">${pct ? `+${pct}% streak boost included` : 'Base daily reward'}</div>
       </div>
-      <button class="btn btn--primary btn--block" type="button" id="claimBtn" ${st.claimed ? 'disabled' : ''} style="margin-bottom:16px">
+      <button class="btn btn--primary btn--block checkin-claim-btn" type="button" id="claimBtn" ${st.claimed ? 'disabled' : ''}>
         ${st.claimed ? icon('check') + ' Checked in — come back tomorrow' : icon('flame') + ' Claim ' + naira(todayValue)}
       </button>`;
 
     if (!st.claimed) countTo(document.getElementById('claimAmt'), todayValue, naira);
 
     document.getElementById('ladder').innerHTML = [[7, s.streak_7], [14, s.streak_14], [30, s.streak_30]]
-      .map(([d, p]) => `<div class="tier ${st.streak >= d ? 'on' : ''}"><b>+${p}%</b><span>DAY ${d}</span></div>`).join('');
+      .map(([d, p]) => `<div class="tier ${st.streak >= d ? 'on' : ''}"><b>+${p}%</b><span>Day ${d} milestone</span></div>`).join('');
 
     const now = new Date();
     document.getElementById('calTitle').textContent =
@@ -38,8 +47,8 @@
     const firstDow = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
     document.getElementById('cal').innerHTML =
       ['S', 'M', 'T', 'W', 'T', 'F', 'S'].map(d => `<div class="cal-dow">${d}</div>`).join('') +
-      Array.from({ length: firstDow }, () => '<div></div>').join('') +
-      st.calendar.map(c => `<div class="cal-day ${c.hit ? 'hit' : c.isToday ? 'today' : c.future ? 'future' : 'miss'}">${c.d}</div>`).join('');
+      Array.from({ length: firstDow }, () => '<div aria-hidden="true"></div>').join('') +
+      st.calendar.map(c => `<div class="cal-day ${c.hit ? 'hit' : c.isToday ? 'today' : c.future ? 'future' : 'miss'}" aria-label="${c.hit ? 'Checked in' : c.isToday ? 'Today' : c.future ? 'Future date' : 'Missed'}: ${c.d}">${c.d}</div>`).join('');
 
     const hist = Store.transactions('checkin_bonus').slice(0, 8);
     document.getElementById('recent').innerHTML = hist.length ? hist.map(t => `
