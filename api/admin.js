@@ -141,6 +141,7 @@ export default async function handler(req, res) {
               if (error) throw new Error(error.message);
               return ok(res, { message: 'Withdrawal marked as paid manually.' });
             }
+            if (tx.gateway_status === 'submitted') throw new Error('MGM Pay already accepted this withdrawal; wait for settlement confirmation.');
             try {
               const result = await submitWithdrawalGateway(tx);
               const { error } = await sb.rpc('record_gateway_withdrawal_submission', { p_tx: p.id, p_gateway_reference: result.reference });
