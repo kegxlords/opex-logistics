@@ -191,7 +191,7 @@ insert into public.settings (key,value) values
  ('withdrawal_start','08:00'),('withdrawal_end','18:00'),
  ('withdrawal_mode','review'),
  ('bank_name','Guaranty Trust Bank'),('account_number','0123456789'),
- ('account_name','Pinnacle Apartments Ltd'),
+ ('account_name','Opex Logistics Ltd'),
  ('whatsapp_link','https://chat.whatsapp.com/HdKsgo89Oi1LUBqMbI9Rmp?s=cl&p=a&mlu=4&ilr=4&iam=2'),
  ('telegram_link','https://t.me/pinnacleapartments'),
  ('support_link','https://wa.me/2348000000000'),

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /* ============================================================
-   CSC Apartments — cache buster
+   Opex Logistics — cache buster
    Usage:  node tools/bump-cache.js
    Stamps ?v=N onto every assets/css|js reference in all HTML
    files (root + admin/), so stale immutable caches are bypassed.
