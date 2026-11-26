@@ -94,12 +94,23 @@ create table if not exists public.transactions (
   net_amount numeric(15,2) not null,
   description text, reference text unique,
   status text not null default 'pending' check (status in ('pending','completed','rejected')),
-  bank_name text, account_number text, account_name text,
+  bank_name text, bank_code text, account_number text, account_name text,
   admin_note text, processed_by uuid references public.profiles(id),
+  processing_mode text not null default 'review' check (processing_mode in ('gateway','review','manual')),
+  gateway_status text not null default 'not_attempted' check (gateway_status in ('not_attempted','submitted','failed')),
+  gateway_reference text, gateway_attempts int not null default 0,
+  gateway_error text, gateway_submitted_at timestamptz,
   created_at timestamptz default now()
 );
 create index if not exists tx_user_idx on public.transactions (user_id, created_at desc);
 create index if not exists tx_queue_idx on public.transactions (type, status, created_at desc);
+alter table public.transactions add column if not exists processing_mode text not null default 'review';
+alter table public.transactions add column if not exists bank_code text;
+alter table public.transactions add column if not exists gateway_status text not null default 'not_attempted';
+alter table public.transactions add column if not exists gateway_reference text;
+alter table public.transactions add column if not exists gateway_attempts int not null default 0;
+alter table public.transactions add column if not exists gateway_error text;
+alter table public.transactions add column if not exists gateway_submitted_at timestamptz;
 
 create table if not exists public.bank_accounts (
   id uuid primary key default gen_random_uuid(),
@@ -178,6 +189,7 @@ insert into public.settings (key,value) values
  ('streak_7','5'),('streak_14','10'),('streak_30','20'),
  ('withdrawal_days','0,1,2,3,4,5,6'),
  ('withdrawal_start','08:00'),('withdrawal_end','18:00'),
+ ('withdrawal_mode','review'),
  ('bank_name','Guaranty Trust Bank'),('account_number','0123456789'),
  ('account_name','Pinnacle Apartments Ltd'),
  ('whatsapp_link','https://chat.whatsapp.com/HdKsgo89Oi1LUBqMbI9Rmp?s=cl&p=a&mlu=4&ilr=4&iam=2'),
@@ -459,7 +471,7 @@ declare
   w public.wallets%rowtype; c public.bank_accounts%rowtype;
   v_fee numeric; v_pct numeric; v_min numeric; v_max numeric; v_cap int;
   v_days text; v_start text; v_end text; v_now record; v_tx uuid; v_used int;
-  v_dow int; v_mins int;
+  v_dow int; v_mins int; v_mode text;
 begin
   select * into c from public.bank_accounts where id=p_card and user_id=p_user;
   if not found then raise exception 'Save a payout card before withdrawing.'; end if;
@@ -474,6 +486,9 @@ begin
   select value into v_days  from public.settings where key='withdrawal_days';
   select value into v_start from public.settings where key='withdrawal_start';
   select value into v_end   from public.settings where key='withdrawal_end';
+  select case when value in ('gateway','review','manual') then value else 'review' end into v_mode
+    from public.settings where key='withdrawal_mode';
+  v_mode := coalesce(v_mode, 'review');
 
   if p_amount < v_min then raise exception 'Minimum withdrawal is %.', v_min; end if;
   if p_amount > v_max then raise exception 'Maximum withdrawal is %.', v_max; end if;
@@ -506,11 +521,11 @@ begin
   v_fee := round(p_amount * v_pct / 100, 2);
 
   insert into public.transactions
-    (user_id,type,amount,fee,net_amount,description,reference,status,bank_name,account_number,account_name)
+    (user_id,type,amount,fee,net_amount,description,reference,status,bank_name,bank_code,account_number,account_name,processing_mode)
   values (p_user,'withdrawal',p_amount,v_fee,p_amount-v_fee,
           'Withdrawal to '||c.bank_name,
           'WTH-'||upper(substr(replace(gen_random_uuid()::text,'-',''),1,6)),
-          'pending',c.bank_name,c.account_number,c.account_name)
+          'pending',c.bank_name,c.bank_code,c.account_number,c.account_name,v_mode)
   returning id into v_tx;
 
   update public.wallets set locked = locked + p_amount, updated_at=now() where user_id=p_user;
@@ -535,6 +550,39 @@ begin
 
   insert into public.audit_log (actor,action,target,meta)
   values (p_admin,'approve_withdrawal',p_tx,jsonb_build_object('gross',t.amount,'net',t.net_amount));
+end $$;
+
+create or replace function public.complete_gateway_withdrawal(p_tx uuid, p_admin uuid, p_gateway_reference text default null)
+returns void language plpgsql security definer set search_path = public as $$
+declare t public.transactions%rowtype;
+begin
+  select * into t from public.transactions where id=p_tx and type='withdrawal' for update;
+  if not found then raise exception 'Withdrawal not found.'; end if;
+  if t.status <> 'pending' then raise exception 'This withdrawal has already been processed.'; end if;
+  update public.transactions set status='completed', processed_by=p_admin,
+    gateway_status='submitted', gateway_reference=coalesce(p_gateway_reference,gateway_reference),
+    gateway_error=null, gateway_submitted_at=coalesce(gateway_submitted_at, now()) where id=p_tx;
+  update public.wallets set balance = balance - t.amount, locked = greatest(0, locked - t.amount), updated_at=now() where user_id=t.user_id;
+  update public.profiles set total_withdrawn = total_withdrawn + t.net_amount where id=t.user_id;
+  insert into public.audit_log (actor,action,target,meta)
+  values (p_admin,'gateway_withdrawal_completed',p_tx,jsonb_build_object('gross',t.amount,'net',t.net_amount,'gateway_reference',p_gateway_reference));
+end $$;
+
+create or replace function public.record_gateway_withdrawal_failure(p_tx uuid, p_error text)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  update public.transactions set gateway_status='failed', gateway_attempts=gateway_attempts+1,
+    gateway_error=left(coalesce(p_error,'Gateway request failed.'),500) where id=p_tx and type='withdrawal' and status='pending';
+  if not found then raise exception 'Pending withdrawal not found.'; end if;
+end $$;
+
+create or replace function public.record_gateway_withdrawal_submission(p_tx uuid, p_gateway_reference text)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  update public.transactions set gateway_status='submitted', gateway_attempts=gateway_attempts+1,
+    gateway_reference=p_gateway_reference, gateway_error=null, gateway_submitted_at=now()
+  where id=p_tx and type='withdrawal' and status='pending';
+  if not found then raise exception 'Pending withdrawal not found.'; end if;
 end $$;
 
 create or replace function public.reject_withdrawal(p_tx uuid, p_admin uuid, p_note text)
@@ -634,7 +682,6 @@ alter table public.admin_impersonation_sessions enable row level security;
 drop policy if exists profiles_self_read on public.profiles;
 create policy profiles_self_read on public.profiles for select using (auth.uid() = id);
 drop policy if exists profiles_self_update on public.profiles;
-create policy profiles_self_update on public.profiles for update using (auth.uid() = id);
 drop policy if exists profiles_team_read on public.profiles;
 create policy profiles_team_read on public.profiles for select
   using (referred_by = auth.uid() or upline_2 = auth.uid() or upline_3 = auth.uid());
@@ -686,7 +733,15 @@ create policy comm_admin_read on public.referral_commissions for select using (p
 
 -- settings
 drop policy if exists settings_public_read on public.settings;
-create policy settings_public_read on public.settings for select using (true);
+drop policy if exists settings_member_read on public.settings;
+create policy settings_member_read on public.settings for select using (key in (
+  'min_deposit','max_deposit','min_withdrawal','max_withdrawal','withdrawal_fee','withdrawals_per_day',
+  'income_days','income_drop_days','welcome_bonus','checkin_bonus','streak_7','streak_14','streak_30',
+  'withdrawal_days','withdrawal_start','withdrawal_end','withdrawal_mode','deposit_bank_1_name',
+  'deposit_bank_1_account_number','deposit_bank_1_account_name','deposit_bank_2_name',
+  'deposit_bank_2_account_number','deposit_bank_2_account_name','bank_name','account_number',
+  'account_name','whatsapp_link','telegram_link','support_link','support_email'
+));
 drop policy if exists settings_admin_write on public.settings;
 create policy settings_admin_write on public.settings for all using (public.is_admin()) with check (public.is_admin());
 
@@ -696,8 +751,10 @@ create policy cron_admin_read on public.cron_runs for select using (public.is_ad
 
 -- support tickets
 drop policy if exists tickets_self_all on public.support_tickets;
-create policy tickets_self_all on public.support_tickets for all
-  using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists tickets_self_read on public.support_tickets;
+create policy tickets_self_read on public.support_tickets for select using (auth.uid() = user_id);
+drop policy if exists tickets_self_insert on public.support_tickets;
+create policy tickets_self_insert on public.support_tickets for insert with check (auth.uid() = user_id);
 drop policy if exists tickets_admin_all on public.support_tickets;
 create policy tickets_admin_all on public.support_tickets for all using (public.is_admin()) with check (public.is_admin());
 
@@ -714,6 +771,9 @@ revoke all on function public.sweep_income(int) from public, anon, authenticated
 revoke all on function public.approve_deposit(uuid,uuid,text) from public, anon, authenticated;
 revoke all on function public.reject_deposit(uuid,uuid,text) from public, anon, authenticated;
 revoke all on function public.approve_withdrawal(uuid,uuid,text) from public, anon, authenticated;
+revoke all on function public.complete_gateway_withdrawal(uuid,uuid,text) from public, anon, authenticated;
+revoke all on function public.record_gateway_withdrawal_failure(uuid,text) from public, anon, authenticated;
+revoke all on function public.record_gateway_withdrawal_submission(uuid,text) from public, anon, authenticated;
 revoke all on function public.reject_withdrawal(uuid,uuid,text) from public, anon, authenticated;
 revoke all on function public.admin_adjust_wallet(uuid,uuid,numeric,text,text) from public, anon, authenticated;
 revoke all on function public.admin_grant_lease(uuid,uuid,uuid) from public, anon, authenticated;
@@ -736,6 +796,9 @@ grant execute on function public.sweep_income(int) to service_role;
 grant execute on function public.approve_deposit(uuid,uuid,text) to service_role;
 grant execute on function public.reject_deposit(uuid,uuid,text) to service_role;
 grant execute on function public.approve_withdrawal(uuid,uuid,text) to service_role;
+grant execute on function public.complete_gateway_withdrawal(uuid,uuid,text) to service_role;
+grant execute on function public.record_gateway_withdrawal_failure(uuid,text) to service_role;
+grant execute on function public.record_gateway_withdrawal_submission(uuid,text) to service_role;
 grant execute on function public.reject_withdrawal(uuid,uuid,text) to service_role;
 grant execute on function public.admin_adjust_wallet(uuid,uuid,numeric,text,text) to service_role;
 grant execute on function public.admin_grant_lease(uuid,uuid,uuid) to service_role;
