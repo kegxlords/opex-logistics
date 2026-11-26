@@ -7,7 +7,7 @@ window.PINNACLE = {
   SUPABASE_URL: 'https://khzlelahiznpexcixcsu.supabase.co',
   SUPABASE_ANON_KEY: 'sb_publishable_jwnzzTk45cVA3kfJYhAUPg_-08nNCAO',
 
-  BRAND: 'Tranex',
+  BRAND: 'Opex Logistics',
   TZ: 'Africa/Lagos',
 
   /* Locally hosted illustrative property photography.

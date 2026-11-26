@@ -1,5 +1,5 @@
 /* ============================================================
-   TRANEX — Daily attendance control
+   OPEX LOGISTICS — Daily attendance control
    ============================================================ */
 (function () {
   'use strict';

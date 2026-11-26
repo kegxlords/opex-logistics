@@ -1,9 +1,9 @@
 {
-  "name": "csc-apartments",
+  "name": "opex-logistics",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "CSC Apartments — managed residences with 24-hour rental income distribution.",
+  "description": "Opex Logistics — managed logistics operations with 24-hour rental income distribution.",
   "scripts": {
     "dev": "vercel dev",
     "deploy": "vercel --prod"

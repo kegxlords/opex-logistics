@@ -31,11 +31,11 @@
       QR.downloadSVG(link, 'tranex-' + me.referral_code + '.svg'); toast('QR downloaded', 'ok');
     });
 
-    const shareText = `Join me on Tranex — track every lease and income drop from your dispatch board. Use my code ${me.referral_code}: ${link}`;
+    const shareText = `Join me on Opex Logistics — track every lease and income drop from your dispatch board. Use my code ${me.referral_code}: ${link}`;
     document.getElementById('waShare').href = 'https://wa.me/?text=' + encodeURIComponent(shareText);
     document.getElementById('shareBtn').addEventListener('click', async () => {
       if (navigator.share) {
-        try { await navigator.share({ title: 'Tranex', text: shareText, url: link }); }
+        try { await navigator.share({ title: 'Opex Logistics', text: shareText, url: link }); }
         catch (e) { if (e.name !== 'AbortError') copyText(link, 'Referral link copied'); }
       } else copyText(link, 'Referral link copied — paste it anywhere');
     });
@@ -141,7 +141,7 @@
     { title: '03 / Crew & support', links: [
       ['refer.html', 'refer', 'Refer & earn', 'Share your invitation link and QR', 'teal'],
       ['team.html', 'team', 'My team', 'View your referral network', 'blue'],
-      ['support.html', 'headset', 'Support desk', 'Contact Tranex care', 'amber']
+      ['support.html', 'headset', 'Support desk', 'Contact Opex Logistics care', 'amber']
     ] }
   ];
 

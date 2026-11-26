@@ -26,7 +26,7 @@
     const h = document.getElementById('hero'); if (!h) return;
     h.innerHTML = `<img class="auth-hero-img" src="${esc(window.PINNACLE.IMAGES.authHero)}" alt=""
         onerror="this.onerror=null;this.src='${Store.banner(0)}'">
-      <div class="auth-hero-badge">${UI.crest()}<b>TRANEX DISPATCH</b></div>`;
+      <div class="auth-hero-badge">${UI.crest()}<b>OPEX LOGISTICS DISPATCH</b></div>`;
   }
   function eyes() {
     document.querySelectorAll('[data-eye]').forEach(btn => {

@@ -1,5 +1,5 @@
 /* ============================================================
-   Tranex — dedicated package catalogue
+   Opex Logistics — dedicated package catalogue
    Uses the existing Store.rent flow and purchase rules unchanged.
    ============================================================ */
 (function () {

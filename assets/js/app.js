@@ -184,7 +184,7 @@
     const impersonating = Store.impersonating && Store.impersonating();
     h.innerHTML = `<div class="header-in">
       ${back ? `<a class="back-btn" href="${back}" aria-label="Back">${icon('back')}</a>` : ''}
-      <a class="crest" href="dashboard.html">${crest()}<span class="crest-txt"><b>Tranex</b><i>Dispatch network</i></span></a>
+      <a class="crest" href="dashboard.html">${crest()}<span class="crest-txt"><b>Opex Logistics</b><i>Dispatch network</i></span></a>
       ${title ? `<span class="header-title">${esc(title)}</span>` : ''}
       <div class="dispatch-data" aria-label="Dispatch timing">
         <span class="dispatch-readout"><small>WAT</small><b id="watClock">--:--:--</b></span>
