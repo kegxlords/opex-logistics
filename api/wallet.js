@@ -1,4 +1,4 @@
-import { admin, user, ok, fail, body, settingsMap, num, ref } from './_core.js';
+import { admin, user, ok, fail, body, settingsMap, num, ref, submitWithdrawalGateway, submitDepositGateway } from './_core.js';
 
 export default async function handler(req, res) {
   const sb = admin();
@@ -35,6 +35,16 @@ export default async function handler(req, res) {
           reference, status: 'pending'
         }).select().single();
         if (error) throw new Error(error.message);
+        if (process.env.MGM_PROXY_URL) {
+          try {
+            const gateway = await submitDepositGateway(data);
+            await sb.from('transactions').update({ gateway_status: 'submitted', gateway_reference: gateway.reference, gateway_submitted_at: new Date().toISOString() }).eq('id', data.id);
+            return ok(res, { transaction: { ...data, gateway_status: 'submitted', gateway_reference: gateway.reference }, reference, checkout_url: gateway.checkoutUrl, message: 'Deposit order created. Complete payment on MGM Pay.' });
+          } catch (gatewayError) {
+            await sb.from('transactions').update({ gateway_status: 'failed', gateway_error: gatewayError.message }).eq('id', data.id);
+            throw gatewayError;
+          }
+        }
         return ok(res, { transaction: data, reference, message: 'Deposit submitted for review.' });
       }
 
@@ -43,10 +53,31 @@ export default async function handler(req, res) {
         if (!b.card_id) throw new Error('Save a payout card before withdrawing.');
         const { data, error } = await sb.rpc('request_withdrawal', { p_user: u.id, p_amount: amount, p_card: b.card_id });
         if (error) throw new Error(error.message);
-        const { data: tx } = await sb.from('transactions').select('*').eq('id', data).single();
+        let { data: tx } = await sb.from('transactions').select('*').eq('id', data).single();
+        let message = tx?.processing_mode === 'manual' ? 'Withdrawal queued for manual processing.'
+          : tx?.processing_mode === 'review' ? 'Withdrawal submitted for administrator review.'
+          : 'Withdrawal submitted to the payout gateway.';
+        if (tx?.processing_mode === 'gateway') {
+          try {
+            const result = await submitWithdrawalGateway(tx);
+            const { error: submissionError } = await sb.rpc('record_gateway_withdrawal_submission', {
+              p_tx: tx.id, p_gateway_reference: result.reference
+            });
+            if (submissionError) throw new Error(submissionError.message);
+            const refreshed = await sb.from('transactions').select('*').eq('id', tx.id).single();
+            tx = refreshed.data || tx;
+            message = 'Withdrawal accepted by MGM Pay and awaiting settlement confirmation.';
+          } catch (gatewayError) {
+            const { error: recordError } = await sb.rpc('record_gateway_withdrawal_failure', {
+              p_tx: tx.id, p_error: gatewayError.message
+            });
+            if (recordError) throw new Error(recordError.message);
+            message = 'Withdrawal queued, but the gateway attempt failed. An administrator will retry it.';
+          }
+        }
         return ok(res, {
           transaction: tx, reference: tx?.reference, fee: Number(tx?.fee || 0),
-          net: Number(tx?.net_amount || 0), message: 'Withdrawal requested.'
+          net: Number(tx?.net_amount || 0), message
         });
       }
 

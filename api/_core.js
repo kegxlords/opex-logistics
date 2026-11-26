@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, createHmac } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 
 const hashToken = token => createHash('sha256').update(String(token)).digest('hex');
@@ -77,3 +77,41 @@ export function lagosNow() {
 }
 
 export const ref = prefix => prefix + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+
+async function callMgmRelay(action, payload) {
+  const url = String(process.env.MGM_PROXY_URL || '').trim();
+  const secret = String(process.env.MGM_PROXY_SHARED_SECRET || '').trim();
+  if (!url || !secret) throw new Error('MGM cPanel relay is not configured. Set MGM_PROXY_URL and MGM_PROXY_SHARED_SECRET in Vercel.');
+  const config = {
+    base_url: process.env.MGM_PAY_BASE_URL || 'https://api.mgm-paysandbox.com',
+    merchant_no: process.env.MGM_PAY_MERCHANT_NO,
+    app_id: process.env.MGM_PAY_APP_ID,
+    collection_key: process.env.MGM_PAY_COLLECTION_KEY,
+    payout_key: process.env.MGM_PAY_PAYOUT_KEY,
+    deposit_notification_url: process.env.MGM_PAY_DEPOSIT_NOTIFICATION_URL,
+    withdrawal_notification_url: process.env.MGM_PAY_WITHDRAWAL_NOTIFICATION_URL,
+    success_redirect_url: process.env.MGM_PAY_SUCCESS_REDIRECT_URL
+  };
+  const body = JSON.stringify({ action, config, ...payload });
+  const signature = createHmac('sha256', secret).update(body, 'utf8').digest('hex');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json', 'x-mgm-proxy-signature': signature }, signal: controller.signal, body });
+    const raw = await response.text();
+    let data = {}; try { data = raw ? JSON.parse(raw) : {}; } catch { data = { message: raw }; }
+    if (!response.ok || data.success === false) throw new Error(data.error || data.message || `MGM relay returned HTTP ${response.status}.`);
+    return data;
+  } finally { clearTimeout(timer); }
+}
+
+export async function submitWithdrawalGateway(tx) {
+  if (!tx.bank_code) throw new Error('This payout card has no Nigerian bank code. Update the saved payout card.');
+  const result = await callMgmRelay('withdrawal', { reference: tx.reference, amount: Number(tx.net_amount), account_name: tx.account_name, account_number: tx.account_number, bank_code: tx.bank_code });
+  return { reference: result.gateway_reference || tx.reference };
+}
+
+export async function submitDepositGateway(tx) {
+  const result = await callMgmRelay('deposit', { reference: tx.reference, amount: Number(tx.amount) });
+  return { reference: result.gateway_reference || tx.reference, checkoutUrl: result.checkout_url || null };
+}

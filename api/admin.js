@@ -1,9 +1,10 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { admin, requireAdmin, ok, fail, body, num } from './_core.js';
+import { admin, requireAdmin, ok, fail, body, num, submitWithdrawalGateway } from './_core.js';
 
 const hashToken = token => createHash('sha256').update(String(token)).digest('hex');
 const queueStatuses = new Set(['all', 'pending', 'completed', 'rejected']);
 const unitStatuses = new Set(['live', 'hidden', 'upcoming', 'deleted']);
+const withdrawalModes = new Set(['gateway', 'review', 'manual']);
 const validDays = value => {
   const days = String(value || '').split(',').map(v => Number(v.trim()));
   return days.length > 0 && days.every(Number.isInteger) && days.every(v => v >= 0 && v <= 6) && new Set(days).size === days.length;
@@ -132,8 +133,25 @@ export default async function handler(req, res) {
           return ok(res, { message: 'Deposit rejected.' });
 
         case 'approve_withdrawal':
-          await sb.rpc('approve_withdrawal', { p_tx: p.id, p_admin: actor.id, p_note: p.note || null });
-          return ok(res, { message: 'Withdrawal marked as paid.' });
+          {
+            const { data: tx, error: txError } = await sb.from('transactions').select('*').eq('id', p.id).eq('type', 'withdrawal').single();
+            if (txError || !tx) throw new Error('Withdrawal not found.');
+            if (tx.processing_mode === 'manual') {
+              const { error } = await sb.rpc('approve_withdrawal', { p_tx: p.id, p_admin: actor.id, p_note: p.note || null });
+              if (error) throw new Error(error.message);
+              return ok(res, { message: 'Withdrawal marked as paid manually.' });
+            }
+            try {
+              const result = await submitWithdrawalGateway(tx);
+              const { error } = await sb.rpc('record_gateway_withdrawal_submission', { p_tx: p.id, p_gateway_reference: result.reference });
+              if (error) throw new Error(error.message);
+              return ok(res, { message: 'Withdrawal approved and accepted by MGM Pay; awaiting settlement confirmation.' });
+            } catch (gatewayError) {
+              const { error } = await sb.rpc('record_gateway_withdrawal_failure', { p_tx: p.id, p_error: gatewayError.message });
+              if (error) throw new Error(error.message);
+              throw new Error('Gateway submission failed; the withdrawal remains pending for retry.');
+            }
+          }
 
         case 'reject_withdrawal':
           if (!p.note) throw new Error('A reason is required to reject a withdrawal.');
@@ -245,6 +263,7 @@ export default async function handler(req, res) {
         case 'save_settings': {
           if (p.withdrawal_days !== undefined && !validDays(p.withdrawal_days)) throw new Error('Withdrawal days must be a comma-separated list of unique values from 0 to 6.');
           if (p.income_drop_days !== undefined && !validDays(p.income_drop_days)) throw new Error('Income drop days must be a comma-separated list of unique values from 0 to 6.');
+          if (p.withdrawal_mode !== undefined && !withdrawalModes.has(String(p.withdrawal_mode))) throw new Error('Withdrawal mode must be gateway, review, or manual.');
           const rows = Object.entries(p).map(([key, value]) => ({ key, value: String(value) }));
           if (!rows.length) throw new Error('Nothing to save.');
           const { error } = await sb.from('settings').upsert(rows, { onConflict: 'key' });

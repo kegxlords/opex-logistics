@@ -263,6 +263,7 @@
       ['income_days', 'Income duration (days)'], ['welcome_bonus', 'Welcome bonus'], ['checkin_bonus', 'Check-in bonus'],
       ['withdrawal_days', 'Withdrawal days (0=Sun, 1=Mon … 6=Sat)'],
       ['income_drop_days', 'Income drop days (0=Sun, 1=Mon … 6=Sat)'],
+      ['withdrawal_mode', 'Withdrawal processing mode'],
       ['withdrawal_start', 'Withdrawal start (WAT)'], ['withdrawal_end', 'Withdrawal end (WAT)'],
       ['deposit_bank_1_name', 'Deposit option 1 bank'], ['deposit_bank_1_account_number', 'Deposit option 1 account number'], ['deposit_bank_1_account_name', 'Deposit option 1 account name'],
       ['deposit_bank_2_name', 'Deposit option 2 bank'], ['deposit_bank_2_account_number', 'Deposit option 2 account number'], ['deposit_bank_2_account_name', 'Deposit option 2 account name'],
@@ -274,6 +275,7 @@
         const isDepositField = /^deposit_bank_[12]_(name|account_number|account_name)$/.test(key);
         const isAccountNumber = /^deposit_bank_[12]_account_number$/.test(key);
         const isNumeric = /^(min_|max_|withdrawal_fee$|withdrawals_per_day$|referral_|income_days$|welcome_bonus$|checkin_bonus$)/.test(key);
+        if (key === 'withdrawal_mode') return `<label class="field-row"><span class="label">${esc(label)}</span><select class="input" name="withdrawal_mode"><option value="gateway" ${settingsData[key] === 'gateway' ? 'selected' : ''}>Direct gateway</option><option value="review" ${settingsData[key] === 'review' || !settingsData[key] ? 'selected' : ''}>Admin review before gateway</option><option value="manual" ${settingsData[key] === 'manual' ? 'selected' : ''}>Manual processing</option></select><small class="c-muted">Gateway modes require the Vercel gateway variables. Manual mode never calls the gateway.</small></label>`;
         return `<label class="field-row"><span class="label">${esc(label)}</span><input class="input" name="${key}" value="${esc(settingsData[key] ?? '')}" placeholder="${key.endsWith('_days') && key !== 'income_days' ? '1,2,3,4,5' : ''}" ${isNumeric ? 'type="number" step="any"' : ''} ${isAccountNumber ? 'inputmode="numeric" pattern="[0-9]{10}" maxlength="10"' : ''} ${isDepositField ? 'required' : ''}></label>`;
       }).join('')}
       </div><button class="btn btn--blue" type="submit" style="margin-top:18px">Save settings</button></form></section>`;

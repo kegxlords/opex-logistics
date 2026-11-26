@@ -58,9 +58,10 @@
       btn.disabled = true; btn.innerHTML = '<i class="spin"></i> Submitting…';
       try {
         const r = await Store.deposit(document.getElementById('amt').value, document.getElementById('senderName').value.trim());
-        a.show('Deposit submitted. Reference ' + r.reference + '. Our team will confirm shortly.', 'ok');
+        a.show((r.message || 'Deposit submitted.') + ' Reference ' + r.reference + (r.checkoutUrl ? ' Opening secure checkout…' : ' Our team will confirm shortly.'), 'ok');
         toast('Deposit submitted', 'ok', { sub: 'Reference ' + r.reference, undo: () => { Store.undo(); paintBal(); recent('deposit', 'recent'); toast('Deposit withdrawn', 'info'); } });
         e.target.reset();
+        if (r.checkoutUrl) { window.location.assign(r.checkoutUrl); return; }
         document.querySelectorAll('[data-amt]').forEach(x => x.className = 'btn btn--ghost btn--xs');
         paintBal(); recent('deposit', 'recent');
         btn.disabled = false; btn.innerHTML = old;
@@ -145,7 +146,7 @@
       try {
         const cardSel = document.getElementById('cardSel');
         const r = await Store.withdraw(document.getElementById('amt').value, cardSel ? cardSel.value : '');
-        a.show(`Withdrawal requested. ${naira(r.net)} will be paid to your saved account. Reference ${r.reference}.`, 'ok');
+        a.show(`${r.message || 'Withdrawal requested.'} ${naira(r.net)} will be paid to your saved account. Reference ${r.reference}.`, 'ok');
         toast('Withdrawal requested', 'ok', { sub: naira(r.net) + ' net · ' + r.reference, undo: () => { Store.undo(); paint(); toast('Withdrawal cancelled', 'info'); } });
         document.getElementById('amt').value = '';
         paint();
