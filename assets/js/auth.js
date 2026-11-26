@@ -24,9 +24,32 @@
   }
   function hero() {
     const h = document.getElementById('hero'); if (!h) return;
-    h.innerHTML = `<img class="auth-hero-img" src="${esc(window.PINNACLE.IMAGES.authHero)}" alt=""
-        onerror="this.onerror=null;this.src='${Store.banner(0)}'">
-      <div class="auth-hero-badge">${UI.crest()}<b>OPEX LOGISTICS DISPATCH</b></div>`;
+    const isRegister = document.body.dataset.page === 'register';
+    const headline = isRegister ? 'Enter the\nnetwork.' : 'Move with\nprecision.';
+    const description = isRegister ? 'Claim your private operations seat and keep every next move in view.' : 'One calm command center for every property, payout and next move.';
+    h.innerHTML = `<div class="auth-stage" aria-hidden="true">
+        <div class="auth-stage-noise"></div>
+        <div class="auth-orbit auth-orbit--one"></div>
+        <div class="auth-orbit auth-orbit--two"></div>
+        <div class="auth-orbit auth-orbit--three"></div>
+        <div class="auth-signal auth-signal--one"></div>
+        <div class="auth-signal auth-signal--two"></div>
+        <div class="auth-signal auth-signal--three"></div>
+        <div class="auth-node auth-node--origin"><i></i><b>HQ</b></div>
+        <div class="auth-node auth-node--north"><i></i><b>01</b></div>
+        <div class="auth-node auth-node--east"><i></i><b>02</b></div>
+        <div class="auth-node auth-node--south"><i></i><b>03</b></div>
+        <div class="auth-route auth-route--a"><i></i></div>
+        <div class="auth-route auth-route--b"><i></i></div>
+        <div class="auth-route auth-route--c"><i></i></div>
+        <div class="auth-stage-copy">
+          <span class="auth-stage-kicker">Private operations network / 24.7</span>
+          <strong>${esc(headline).replace(/\n/g,'<br>')}</strong>
+          <p>${esc(description)}</p>
+          <div class="auth-stage-stats"><span><b>99.8%</b> uptime</span><span><b>24h</b> income cycle</span></div>
+        </div>
+      </div>
+      <div class="auth-hero-badge">${UI.crest()}<b>OPEX LOGISTICS / CONTROL</b></div>`;
   }
   function eyes() {
     document.querySelectorAll('[data-eye]').forEach(btn => {
